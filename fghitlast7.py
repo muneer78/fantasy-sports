@@ -12,4 +12,4 @@ filters = df[(df['wRC'] >135) & (df['OPS'] > .8) & (df['K'] < 95) & (df['BB'] > 
 
 print (filters)
 
-filters.to_excel("fghitlast7.xlsx", sheet_name='Hitters Last 7 Days')
+filters.to_excel("hitlast7.xlsx", sheet_name='Hitters Last 7 Days')
