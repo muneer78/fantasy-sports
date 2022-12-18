@@ -8,7 +8,7 @@ df.fillna(0)
 
 df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
 
-filters = df[(df['wRC'] >120) & (df['OPS'] > .8) & (df['K'] < 95) & (df['BB'] > 100) & (df['Off'] > 5) & (df['Barrel'] > 10)] 
+filters = df[(df['wRC'] >120) & (df['OPS'] > .8) & (df['K'] < 95) & (df['BB'] > 100) & (df['Off'] > 5) & (df['Barrel'] > 10)].sort_values(by='Off', ascending=False)
 
 print (filters)
 
