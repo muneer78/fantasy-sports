@@ -6,8 +6,12 @@ import pandas as pd
 hitters='Hitters.xlsx'
 pitchers='Pitchers.xlsx'
 
-df1 = pd.read_excel(hitters,sheetname='CT_lot4_LDO_3Tbin1')
+df1= pd.read_excel(hitters)
+df2= pd.read_excel(pitchers)
 
-merge= hitters.merge(pitchers[['Total Z-Score']])
+df3=df1[['Name','Total Z-Score']]
+df4=df2[['Name','Total Z-Score']]
 
-print(merge)
+df5= df3.append(df4[['Name','Total Z-Score']]).sort_values(by='Total Z-Score', ascending=False)
+
+df5.to_excel("TotalZScore.xlsx", sheet_name='Total Z-Scores')
