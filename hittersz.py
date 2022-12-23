@@ -1,15 +1,16 @@
 import pandas as pd
 from scipy import stats
 
-df = pd.read_csv("hitters.csv", index_col=["playerid"]) #Preseason Hitters
+df = pd.read_csv("hitter.csv", index_col=["playerid"]) #Preseason Hitters
 
 df['Barrel%'] = df['Barrel%'] = df['Barrel%'].str.rstrip('%').astype('float')
 
-df = df.select_dtypes(include='number').apply(stats.zscore)
+filter= df[(df['PA'] > 250) & (df['HR'] > 5)]
+
+numbers = df.select_dtypes(include='number').columns
+df[numbers] = df[numbers].apply(stats.zscore)
 
 df['Total Z-Score']= df.sum(axis = 1)
-
-df.iloc[:, 0:22] 
 
 rounded_df = df.round(decimals=2).sort_values(by='Total Z-Score', ascending=False)
 
