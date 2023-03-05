@@ -4,15 +4,15 @@ import numpy as np
 
 df = pd.read_csv("pitcher.csv", index_col=["playerid"]) #Preseason Pitchers
 
-expr1= (df['GS']/(df['ER']*(df['GS']/df['G']))).fillna(0).replace([np.inf, -np.inf], 0)
-expr2= (df['IP']*(df['GS']/df['G'])).fillna(0)
-expr3= (((df['GS']+df['G'])/(2*df['G']))**2).fillna(0)
-expr4= (expr1*expr2*expr3)
+expr1 = (df['GS']/(df['ER']*(df['GS']/df['G']))).fillna(0).replace([np.inf, -np.inf], 0)
+expr2 = (df['IP']*(df['GS']/df['G'])).fillna(0)
+expr3 = (((df['GS']+df['G'])/(2*df['G']))**2).fillna(0)
+expr4 = (expr1*expr2*expr3)
 #df['EstimatedQS']=(expr1*expr2*expr3)
 #df['Estimated QS']= (expr1*expr2*expr3).fillna(0).astype(float)
-df['ER']=(df['ER']*-1)
-df['EstimatedQS']= expr4
-df=df.drop(['ER','GS', 'G'],axis=1)
+df['ER'] = (df['ER']*-1)
+df['EstimatedQS'] = expr4
+df = df.drop(['ER','GS', 'G'],axis=1)
 
 df['F-Strike%'] = df['F-Strike%'].str.rstrip('%').astype('float')
 df['Barrel%'] = df['Barrel%'].str.rstrip('%').astype('float')
@@ -23,19 +23,19 @@ df['Barrel%']= df['Barrel%']*-1
 
 numbers = df.select_dtypes(include='number').columns
 df[numbers] = df[numbers].apply(stats.zscore)
-df['SV']=df['SV']*1.5
-df['Barrel%']= df['Barrel%']*1.5
-df['xFIP-']= df['xFIP-']*1.5
-df['SwStr%']= df['SwStr%']*1.5
-df['F-Strike%']= df['F-Strike%']*1.5
-df['CSW%']= df['CSW%']*1.5
-df['K%+']= df['K%+']*5
-df['BB%+']= df['BB%+']*5
-df['EstimatedQS']= df['EstimatedQS']*5
+df['SV'] = df['SV']*1.5
+df['Barrel%'] = df['Barrel%']*1.5
+df['xFIP-'] = df['xFIP-']*1.5
+df['SwStr%'] = df['SwStr%']*1.5
+df['F-Strike%'] = df['F-Strike%']*1.5
+df['CSW%'] = df['CSW%']*1.5
+df['K%+'] = df['K%+']*5
+df['BB%+'] = df['BB%+']*5
+df['EstimatedQS'] = df['EstimatedQS']*5
 # numbers2 = df[['SV', 'xFIP-', 'SV', 'SwStr%', 'F-Strike%', 'Barrel%','CSW%','K%+', 'BB%+', 'EstimatedQS']]
 #df[numbers2]= (float(df[numbers2]))*2
 
-df['Total Z-Score']= df.sum(axis = 1)
+df['Total Z-Score'] = df.sum(axis = 1)
 #df['Total Z-Score']= df['Total Z-Score']
 
 rounded_df = df.round(decimals=2).sort_values(by='Total Z-Score', ascending=False)
@@ -47,12 +47,12 @@ df = pd.read_csv("hitter.csv", index_col=["playerid"]) #Preseason Hitters
 
 df['Barrel%'] = df['Barrel%'] = df['Barrel%'].str.rstrip('%').astype('float')
 
-filter= df[(df['PA'] > 250) & (df['HR'] > 5)]
+filter = df[(df['PA'] > 250) & (df['HR'] > 5)]
 
 numbers = df.select_dtypes(include='number').columns
 df[numbers] = df[numbers].apply(stats.zscore)
 
-df['Total Z-Score']= df.sum(axis = 1)
+df['Total Z-Score'] = df.sum(axis = 1)
 
 rounded_df = df.round(decimals=2).sort_values(by='Total Z-Score', ascending=False)
 
@@ -96,9 +96,16 @@ dfadp.columns = dfadp.columns.str.strip()
 dfadp = dfadp.drop(['ESPN','CBS','RTS','NFBC','FT'], axis=1)
 
 df1 = dfadp.merge(dffgpit, on=["Key"], how="left").merge(dfstuff[['Key', 'STUFFplus', 'LOCATIONplus', 'PITCHINGplus']], on=["Key"], how="left").merge(dfzpit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dfzhit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dffghit, on=["Key"], how="left")
-df1 = df1.drop(['Team_y', 'playerid_y','Name_y', 'Team'], axis=1)
 df1['Rank'] = df1['Rank'].astype(float)
+#df["Z-Score"] = df["Total Z-Score_x"].combine_first(df["Total Z-Score_y"])
 df1 = df1.fillna('')
+df1 = df1.drop_duplicates(subset=['Player', 'Rank'], keep='last')
+#df1["Z-Score"] = df1["Total Z-Score_x"].combine_first(df1["Total Z-Score_y"])
+#df1.assign(**{'Total Z-Score_x': df1['Total Z-Score_x'].fillna(df1['Total Z-Score_y'])})
+#df1['Total Z-Score_y'].fillna(df1['Total Z-Score_x'], inplace=True)
+df1['Total Z-Score'] = np.where(df1['Total Z-Score_y'] == '', df1['Total Z-Score_x'], df1['Total Z-Score_y'])
+df1 = df1.drop(['Team_y', 'playerid_y', 'Name_y', 'Name_x', 'Team', 'Key', 'Total Z-Score_x', 'Total Z-Score_y', 'playerid_x'], axis=1)
+
 #df2 = df1.sort_values(by=['Rank'])
 
 df1.to_csv('draftsheet.csv')
