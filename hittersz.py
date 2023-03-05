@@ -14,4 +14,5 @@ df['Total Z-Score']= df.sum(axis = 1)
 
 rounded_df = df.round(decimals=2).sort_values(by='Total Z-Score', ascending=False)
 
-rounded_df.to_excel("Hitters.xlsx", sheet_name='Hitters')
+#rounded_df.to_excel("Hitters.xlsx", sheet_name='Hitters')
+rounded_df.to_csv("ZHitters.csv")
