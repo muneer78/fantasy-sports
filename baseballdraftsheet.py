@@ -52,14 +52,15 @@ rounded_df = df.round(decimals=2).sort_values(by='Total Z-Score', ascending=Fals
 
 rounded_df.to_csv("ZHitters.csv")
 
-dffgpit = pd.read_csv("fg2.csv")
-dfstuff = pd.read_csv("stuffplus.csv")
-dfadp = pd.read_csv("adp.csv")
-dfzpit = pd.read_csv("ZPitchers.csv")
-dfzhit = pd.read_csv("ZHitters.csv")
-dffghit = pd.read_csv("fg.csv")
+dffgpit = pd.read_csv('fg2.csv')
+dfstuff = pd.read_csv('stuffplus.csv')
+dfadp = pd.read_csv('adp.csv')
+dfzpit = pd.read_csv('ZPitchers.csv')
+dfzhit = pd.read_csv('ZHitters.csv')
+dffghit = pd.read_csv('fg.csv')
+dflaghezza = pd.read_csv('laghezza.csv')
 
-dflist = [dffgpit, dfzpit, dfzhit, dfadp, dfstuff, dffghit]
+#dflist = [dffgpit, dfzpit, dfzhit, dfadp, dfstuff, dffghit]
 
 dffgpit = dffgpit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '', regex=True)
 dfstuff = dfstuff.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '', regex=True)
@@ -67,6 +68,7 @@ dfadp= dfadp.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex
 dfzpit= dfzpit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
 dffghit= dffghit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
 dfzhit= dfzhit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
+dflaghezza= dflaghezza.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
 
 #for index in range(len(dflist)):
 #    dflist[index] = dflist[index].replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
@@ -80,6 +82,7 @@ dfadp['Key'] = dfadp.Player.apply(func)
 dfzpit['Key'] = dfzpit.Name.apply(func)
 dfzhit['Key'] = dfzhit.Name.apply(func)
 dffghit['Key'] = dffghit.Name.apply(func)
+dflaghezza['Key'] = dflaghezza.Name.apply(func)
 
 dffgpit.columns = dffgpit.columns.str.strip()
 dffghit.columns = dffghit.columns.str.strip()
@@ -88,11 +91,14 @@ dfadp.columns = dfadp.columns.str.strip()
 
 dfadp = dfadp.drop(['ESPN','CBS','RTS','NFBC','FT'], axis=1)
 
-df1 = dfadp.merge(dffgpit, on=["Key"], how="left").merge(dfstuff[['Key', 'STUFFplus', 'LOCATIONplus', 'PITCHINGplus']], on=["Key"], how="left").merge(dfzpit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dfzhit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dffghit, on=["Key"], how="left")
-df1['Rank'] = df1['Rank'].astype(float)
-df1 = df1.fillna('')
+df1 = dfadp.merge(dffgpit, on=["Key"], how="left").merge(dfstuff[['Key', 'STUFFplus', 'LOCATIONplus', 'PITCHINGplus']], on=["Key"], how="left").merge(dfzpit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dfzhit[['Key', 'Total Z-Score']], on=["Key"], how="left").merge(dffghit, on=["Key"], how="left").merge(dflaghezza[['Key', 'LaghezzaRank']], on=["Key"], how="left")
+df1 = df1.fillna(value=0)
+
+cols = ['Rank', 'LaghezzaRank']
+df1[cols] = df1[cols] = df1[cols].apply(pd.to_numeric, errors='coerce', axis=1)
+
 df1 = df1.drop_duplicates(subset=['Player', 'Rank'], keep='last')
 df1['Total Z-Score'] = np.where(df1['Total Z-Score_y'] == '', df1['Total Z-Score_x'], df1['Total Z-Score_y'])
-df1 = df1.drop(['Team_y', 'playerid_y', 'Name_y', 'Name_x', 'Team', 'Key', 'Total Z-Score_x', 'Total Z-Score_y', 'playerid_x'], axis=1)
+df1["RankDiff"] = df1["LaghezzaRank"].subtract(df1["Rank"])
 
 df1.to_csv('draftsheet.csv')
