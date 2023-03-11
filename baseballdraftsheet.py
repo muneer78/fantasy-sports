@@ -60,18 +60,11 @@ dfzhit = pd.read_csv('ZHitters.csv')
 dffghit = pd.read_csv('fg.csv')
 dflaghezza = pd.read_csv('laghezza.csv')
 
-#dflist = [dffgpit, dfzpit, dfzhit, dfadp, dfstuff, dffghit]
-
-dffgpit = dffgpit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '', regex=True)
-dfstuff = dfstuff.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '', regex=True)
-dfadp= dfadp.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
-dfzpit= dfzpit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
-dffghit= dffghit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
-dfzhit= dfzhit.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
-dflaghezza= dflaghezza.replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
-
-#for index in range(len(dflist)):
-#    dflist[index] = dflist[index].replace(r'[^\w\s]|_\*', '', regex=True).replace(r'\bJr$', '', regex=True).replace(r'II$', '',regex=True)
+dflist = [dffgpit, dfzpit, dfzhit, dfadp, dfstuff, dffghit, dflaghezza]
+for index in range(len(dflist)):
+    dflist[index].replace(r'[^\w\s]|_\*', '', regex=True, inplace = True)
+    dflist[index].replace(' Jr', '', regex=True, inplace = True)
+    dflist[index].replace(' II', '', regex=True, inplace = True)
 
 dfadp = dfadp.astype(str)
 
@@ -84,10 +77,9 @@ dfzhit['Key'] = dfzhit.Name.apply(func)
 dffghit['Key'] = dffghit.Name.apply(func)
 dflaghezza['Key'] = dflaghezza.Name.apply(func)
 
-dffgpit.columns = dffgpit.columns.str.strip()
-dffghit.columns = dffghit.columns.str.strip()
-dfstuff.columns = dfstuff.columns.str.strip()
-dfadp.columns = dfadp.columns.str.strip()
+dflist2 = [dffgpit, dfzpit, dfadp, dfstuff]
+for index in range(len(dflist2)):
+    dflist2[index].columns.str.strip()
 
 dfadp = dfadp.drop(['ESPN','CBS','RTS','NFBC','FT'], axis=1)
 
