@@ -91,6 +91,12 @@ df1[cols] = df1[cols] = df1[cols].apply(pd.to_numeric, errors='coerce', axis=1)
 
 df1 = df1.drop_duplicates(subset=['Player', 'Rank'], keep='last')
 df1['Total Z-Score'] = np.where(df1['Total Z-Score_y'] == '', df1['Total Z-Score_x'], df1['Total Z-Score_y'])
-df1["RankDiff"] = df1["LaghezzaRank"].subtract(df1["Rank"])
+df1["RankDiff"] = df1["Rank"] - df1["LaghezzaRank"]
 
-df1.to_csv('draftsheet.csv')
+df1.to_csv('fulldraftsheet.csv')
+
+df2 = pd.read_csv('fulldraftsheet.csv')
+
+columns = ['Player', 'Total Z-Score', 'Rank', 'LaghezzaRank', 'RankDiff']
+df2 = pd.DataFrame(df2, columns=columns)
+df2.to_csv('draftsheet.csv')
