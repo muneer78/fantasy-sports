@@ -91,14 +91,20 @@ df1[cols] = df1[cols] = df1[cols].apply(pd.to_numeric, errors='coerce', axis=1)
 
 df1 = df1.drop_duplicates(subset=['Player', 'Rank'], keep='last')
 df1['Total Z-Score'] = df1['Total Z-Score_x'].mask(df1['Total Z-Score_x'].eq(0), df1['Total Z-Score_y'])
-df1['Combined Rank'] = df1['LaghezzaRank'].mask(df1['LaghezzaRank'].eq(0), df1['Rank'])
-df1["RankDiff"] = df1["Rank"] - df1["LaghezzaRank"]
+#df1['Combined Rank'] = df1['LaghezzaRank'].mask(df1['LaghezzaRank'].eq(0), df1['Rank'])
+df1["RankDiff"] = df1["Rank"] - df1["LaghezzaRank"].mask(df1['LaghezzaRank'].eq(0), df1['Rank'])
+df1 = df1.rename(columns = {'Rank':'ADP'})
 df1.to_csv('fulldraftsheet.csv')
 
 df2 = pd.read_csv('fulldraftsheet.csv')
 
-columns = ['Player', 'Team_x', 'Total Z-Score', 'Combined Rank', 'RankDiff']
+columns = ['Player', 'Team_x', 'Total Z-Score', 'ADP', 'LaghezzaRank', 'RankDiff']
 df2 = pd.DataFrame(df2, columns=columns)
-#df2[['RankDiff', 'Combined Rank', 'Total Z-Score']] = pd.to_numeric(df2[['RankDiff', 'Combined Rank', 'Total Z-Score']])
-df2['Combined Rank'] = sorted(df2['Combined Rank'], key = float)
+df2 = df2.rename(columns = {'Team_x':'Team'})
+df2['ADP'] = sorted(df2['ADP'], key = float)
 df2.to_csv('draftsheet.csv')
+
+df3 = pd.read_csv('draftsheet.csv', index_col=False)
+columns = ['Player', 'Team']
+df3 = pd.DataFrame(df3, columns=columns)
+df3.to_csv('fantrax.csv')
