@@ -2,20 +2,38 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 import os
 
+# #define dictionary
+# comp_dict = {'id': '1', 'oldname': 'FanGraphs Leaderboard.csv', 'newname': 'fgl_pitchers_10_ip.csv',
+#         'id': '2', 'oldname': 'FanGraphs Leaderboard(1).csv',  'newname': 'fgl_pitchers_30_ip.csv',
+#         'id': '3', 'oldname': 'FanGraphs Leaderboard(2).csv', 'newname': 'fgl_hitters_40_pa.csv',
+#         'id': '4', 'oldname': 'FanGraphs Leaderboard(3).csv', 'newname': 'fgl_hitters_last_14.csv',
+#         'id': '5', 'oldname': 'FanGraphs Leaderboard(4).csv', 'newname': 'fgl_hitters_last_7.csv',
+#         'id': '6', 'oldname': 'FanGraphs Leaderboard(5).csv', 'newname':'fgl_pitchers_last_14.csv',
+#         'id': '7', 'oldname': 'FanGraphs Leaderboard(6).csv', 'newname':'fgl_pitchers_last_30.csv',
+#              }
+#
+# # for row in files:
+# #     old_name = "file_name_{}.pdf".format(row['ID'])
+# #     new_name = "{}_{}.pdf".format(row['name'], row['time'])
+# #     os.rename(old_name, new_name)
+
 #define dictionary
-files = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
-        'FanGraphs Leaderboard(1).csv': 'fgl_pitchers_30_ip.csv',
-        'FanGraphs Leaderboard(2).csv': 'fgl_hitters_40_pa.csv',
-        'FanGraphs Leaderboard(3).csv': 'fgl_hitters_last_14.csv',
-        'FanGraphs Leaderboard(4).csv': 'fgl_hitters_last_7.csv',
-        'FanGraphs Leaderboard(5).csv': 'fgl_pitchers_last_14.csv',
-        'FanGraphs Leaderboard(6).csv': 'fgl_pitchers_last_30.csv',
+comp_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
+            'FanGraphs Leaderboard(1).csv': 'fgl_pitchers_30_ip.csv',
+            'FanGraphs Leaderboard(2).csv': 'fgl_hitters_40_pa.csv',
+            'FanGraphs Leaderboard(3).csv': 'fgl_hitters_last_14.csv',
+            'FanGraphs Leaderboard(4).csv': 'fgl_hitters_last_7.csv',
+            'FanGraphs Leaderboard(5).csv': 'fgl_pitchers_last_14.csv',
+            'FanGraphs Leaderboard(6).csv': 'fgl_pitchers_last_30.csv',
              }
 
-for row in files:
-    old_name = "file_name_{}.pdf".format(row['ID'])
-    new_name = "{}_{}.pdf".format(row['name'], row['time'])
-    os.rename(old_name, new_name)
+for newname, oldname in comp_dict.items():
+    os.rename(f"{oldname}", f"{newname}")
+
+# #def rename_files():
+# for key, value in comp_dict.items():
+#     if os.path.exists(key):
+#         os.rename(key,value)
 
 #today = date.today()
 today = datetime.strptime('2023-10-31', '%Y-%m-%d').date() # pinning to last day of baseball season
