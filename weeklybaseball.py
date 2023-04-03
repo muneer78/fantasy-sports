@@ -1,19 +1,27 @@
 import pandas as pd
 from datetime import date, datetime, timedelta
+import os
 
 #define dictionary
-some_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
-             'FanGraphs Leaderboard(1).csv': 'fgl_pitchers_30_ip.csv',
-             'FanGraphs Leaderboard(2).csv': 'fgl_hitters_40_pa.csv',
-             'FanGraphs Leaderboard(3).csv': 'fgl_hitters_last_14.csv',
-             'FanGraphs Leaderboard(4).csv': 'fgl_hitters_last_7.csv',
-             'FanGraphs Leaderboard(5).csv': 'fgl_pitchers_last_14.csv',
-             'FanGraphs Leaderboard(6).csv': 'fgl_pitchers_last_30.csv','
+files = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
+        'FanGraphs Leaderboard(1).csv': 'fgl_pitchers_30_ip.csv',
+        'FanGraphs Leaderboard(2).csv': 'fgl_hitters_40_pa.csv',
+        'FanGraphs Leaderboard(3).csv': 'fgl_hitters_last_14.csv',
+        'FanGraphs Leaderboard(4).csv': 'fgl_hitters_last_7.csv',
+        'FanGraphs Leaderboard(5).csv': 'fgl_pitchers_last_14.csv',
+        'FanGraphs Leaderboard(6).csv': 'fgl_pitchers_last_30.csv',
              }
+
+for row in files:
+    old_name = "file_name_{}.pdf".format(row['ID'])
+    new_name = "{}_{}.pdf".format(row['name'], row['time'])
+    os.rename(old_name, new_name)
 
 #today = date.today()
 today = datetime.strptime('2023-10-31', '%Y-%m-%d').date() # pinning to last day of baseball season
 
+# Prepare the workbook for adding new sheets
+path = "fg_analysis.xlsx"
 
 def hitters_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
@@ -28,8 +36,6 @@ def hitters_preprocessing(filepath):
                 df['Barrel'] > 10)].sort_values(by='Off', ascending=False)
     print(filters.head())
     return filters
-    # Prepare the workbook for adding new sheets
-    path = "fg_analysis.xlsx"
 
 def pitchers_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
@@ -41,12 +47,10 @@ def pitchers_preprocessing(filepath):
     df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
     df['CSW'] = df['CSW'] = df['CSW'].str.rstrip('%').astype('float')
 
-    filters1 = df[(df['Barrel'] < 7) & (df['Starting'] > 5) & (df['GS'] > 1)].sort_values(by='Starting', ascending=False)
-    filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 1)].sort_values(by='Relieving', ascending=False)
+    filters1 = df[(df['Barrel'] < 7) & (df['Starting'] > 5) & (df['GS'] > 1) & (df['Pitching+'] > 100)].sort_values(by='Starting', ascending=False)
+    filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 1) & (df['Pitching+'] > 100)].sort_values(by='Relieving', ascending=False)
     return filters1
     return filters2
-    # Prepare the workbook for adding new sheets
-    path = "fg_analysis.xlsx"
 
 # Preprocess and export the dataframes to Excel workbook sheets
 hitdaywindow = [7, 14]
