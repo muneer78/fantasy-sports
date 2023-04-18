@@ -3,18 +3,20 @@ from datetime import date, datetime, timedelta
 import os
 
 #define dictionary
-comp_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
-            'FanGraphs Leaderboard (1).csv': 'fgl_pitchers_30_ip.csv',
-            'FanGraphs Leaderboard (2).csv': 'fgl_hitters_40_pa.csv',
-            'FanGraphs Leaderboard (3).csv': 'fgl_hitters_last_14.csv',
-            'FanGraphs Leaderboard (4).csv': 'fgl_hitters_last_7.csv',
-            'FanGraphs Leaderboard (5).csv': 'fgl_pitchers_last_14.csv',
-            'FanGraphs Leaderboard (6).csv': 'fgl_pitchers_last_30.csv',
-             }
+# comp_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
+#             'FanGraphs Leaderboard (1).csv': 'fgl_pitchers_30_ip.csv',
+#             'FanGraphs Leaderboard (2).csv': 'fgl_hitters_40_pa.csv',
+#             'FanGraphs Leaderboard (3).csv': 'fgl_hitters_last_14.csv',
+#             'FanGraphs Leaderboard (4).csv': 'fgl_hitters_last_7.csv',
+#             'FanGraphs Leaderboard (5).csv': 'fgl_pitchers_last_14.csv',
+#             'FanGraphs Leaderboard (6).csv': 'fgl_pitchers_last_30.csv',
+#              }
+#
+# for newname, oldname in comp_dict.items():
+#     #os.renames(f"{oldname}", f"{newname}")
+#     os.replace(newname, oldname)
 
-for newname, oldname in comp_dict.items():
-    #os.renames(f"{oldname}", f"{newname}")
-    os.replace(newname, oldname)
+excluded = pd.read_csv('excluded.csv')
 
 #today = date.today()
 today = datetime.strptime('2023-10-31', '%Y-%m-%d').date() # pinning to last day of baseball season
@@ -25,9 +27,11 @@ path = "fg_analysis.xlsx"
 def hitters_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
-    df.columns = df.columns.str.replace('[+,-,%,]', '')
+    df.columns = df.columns.str.replace('[+,-,%,]', '', regex=True)
     df.rename(columns={'K%-': 'K', 'BB%-': 'BB'}, inplace=True)
     df.fillna(0)
+    #df.drop(excluded.index, axis=1, inplace=True)
+    df[~df.loc[:, 'playerid'].isin(excluded['playerid'])]
 
     df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
 
@@ -39,9 +43,11 @@ def hitters_preprocessing(filepath):
 def pitchers_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
-    df.columns = df.columns.str.replace('[+,-,%,]', '')
+    df.columns = df.columns.str.replace('[+,-,%,]', '', regex=True)
     df.rename(columns={'K/BB': 'KToBB', 'HR/9': 'HRPer9', 'xFIP-': 'XFIPMinus'}, inplace=True)
     df.fillna(0)
+    #df.drop(excluded.index, axis=1, inplace=True)
+    df[~df.loc[:, 'playerid'].isin(excluded['playerid'])]
 
     df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
     df['CSW'] = df['CSW'] = df['CSW'].str.rstrip('%').astype('float')
@@ -61,21 +67,17 @@ with pd.ExcelWriter(path, engine="openpyxl", mode="w") as writer:
     for w in hitdaywindow:
         df = hitters_preprocessing(f'fgl_hitters_last_{w}.csv')
         df.to_excel(writer, sheet_name=f'Hitters Last {w} Days', index=False)
-        df.columns
 
     for w in pawindow:
         df = hitters_preprocessing(f'fgl_hitters_{w}_pa.csv')
         df.to_excel(writer, sheet_name=f'Hitters {w} PA', index=False)
-        df.columns
 
     for w in ipwindow:
         df = pitchers_preprocessing(f'fgl_pitchers_{w}_ip.csv')
         df.to_excel(writer, sheet_name=f'Pitchers Last {w} Innings', index=False)
-        df.columns
 
     for w in pitchdaywindow:
         df = pitchers_preprocessing(f'fgl_pitchers_last_{w}.csv')
         df.to_excel(writer, sheet_name=f'Pitchers Last {w} Days', index=False)
-        df.columns
-#    writer.close()
+    # writer.close()
 
