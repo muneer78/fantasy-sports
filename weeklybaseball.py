@@ -59,47 +59,33 @@ pawindow = [40]
 pitchdaywindow = [14, 30]
 ipwindow = [10, 30]
 
-for w in hitdaywindow:
-    df = hitters_preprocessing(f'fgl_hitters_last_{w}.csv')
-    df.to_csv(f'Hitters Last {w} Days.csv', index=False)
+df_list = []
 
-for w in pawindow:
-    df = hitters_preprocessing(f'fgl_hitters_{w}_pa.csv')
-    df.to_csv(f'Hitters {w} PA.csv', index=False)
+with open('weeklyadds.csv', 'w+') as f:
+    for w in hitdaywindow:
+        f.write(f'Hitters Last {w} Days\n\n')
+        df = hitters_preprocessing(f'fgl_hitters_last_{w}.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
 
-for w in ipwindow:
-    df = pitchers_preprocessing(f'fgl_pitchers_{w}_ip.csv')
-    df.to_csv(f'Pitchers Last {w} Innings.csv', index=False)
+    for w in pawindow:
+        f.write(f'Hitters {w} PA\n\n')
+        df = hitters_preprocessing(f'fgl_hitters_{w}_pa.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
 
-for w in pitchdaywindow:
-    df = pitchers_preprocessing(f'fgl_pitchers_last_{w}.csv')
-    df.to_csv(f'Pitchers Last {w} Days.csv', index=False)
+    for w in ipwindow:
+        f.write(f'Pitchers Last {w} Innings\n\n')
+        df = pitchers_preprocessing(f'fgl_pitchers_{w}_ip.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
 
-# # Create a new CSV file or append to an existing one
-# with open('weeklypickups.csv', mode='w', newline='') as f:
-#     writer = csv.writer(f)
-#     writer.writerow(['Dataframe Name', 'Data'])
-#
-# for w in hitdaywindow:
-#     df = hitters_preprocessing(f'fgl_hitters_last_{w}.csv')
-#     with open('output.csv', mode='a', newline='') as f:
-#         writer = csv.writer(f)
-#         writer.writerow([f'fgl_hitters_last_{w}', df.to_string(index=False)])
-#
-# for w in pawindow:
-#     df = hitters_preprocessing(f'fgl_hitters_{w}_pa.csv')
-#     with open('output.csv', mode='a', newline='') as f:
-#         writer = csv.writer(f)
-#         writer.writerow([f'fgl_hitters_{w}_pa', df.to_string(index=False)])
-#
-# for w in ipwindow:
-#     df = pitchers_preprocessing(f'fgl_pitchers_{w}_ip.csv')
-#     with open('output.csv', mode='a', newline='') as f:
-#         writer = csv.writer(f)
-#         writer.writerow([f'fgl_pitchers_{w}_ip', df.to_string(index=False)])
-#
-# for w in pitchdaywindow:
-#     df = pitchers_preprocessing(f'fgl_pitchers_last_{w}.csv')
-#     with open('output.csv', mode='a', newline='') as f:
-#         writer = csv.writer(f)
-#         writer.writerow([f'fgl_pitchers_last_{w}', df.to_string(index=False)])
+    for w in pitchdaywindow:
+        f.write(f'Pitchers Last {w} Days\n\n')
+        df = pitchers_preprocessing(f'fgl_pitchers_last_{w}.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
