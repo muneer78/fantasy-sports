@@ -34,7 +34,7 @@ dfhitter[numbers] = dfhitter[numbers].apply(stats.zscore)
 dfhitter['Total Z-Score'] = dfhitter.sum(axis=1).round(2)
 dfhitter = dfhitter.merge(temp_df[['Name', 'playerid']], on=["Name"], how="left")
 
-print(dfhitter)
+dfhitter.to_csv('hitterz.csv',index=False)
 
 dfpitcher = pd.read_csv('pitcher.csv')
 temp_df2 = dfpitcher[['Name', 'playerid']]
@@ -50,6 +50,7 @@ dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
 dfpitcher['Total Z-Score'] = dfpitcher.sum(axis = 1).round(2)
 dfpitcher = dfpitcher.merge(temp_df2[['Name', 'playerid']], on=["Name"], how="left")
 
+dfpitcher.to_csv('pitcherz.csv', index=False)
 print(dfpitcher)
 
 today = date.today()
