@@ -2,6 +2,8 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 import os
 import csv
+# from scipy import stats
+import scipy.stats as stats
 
 # define dictionary
 comp_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
@@ -18,19 +20,55 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv('excluded.csv')
 
+dfhitter = pd.read_csv('hitter.csv')
+temp_df = dfhitter[['Name', 'playerid']]
+dfhitter = dfhitter.drop('playerid', axis=1)
+
+# Get the list of columns to zscore
+numbers = dfhitter.select_dtypes(include='number').columns
+
+# Zscore the columns
+dfhitter[numbers] = dfhitter[numbers].apply(stats.zscore)
+
+# Add a column for the total z-score
+dfhitter['Total Z-Score'] = dfhitter.sum(axis=1).round(2)
+dfhitter = dfhitter.merge(temp_df[['Name', 'playerid']], on=["Name"], how="left")
+
+print(dfhitter)
+
+dfpitcher = pd.read_csv('pitcher.csv')
+temp_df2 = dfpitcher[['Name', 'playerid']]
+dfpitcher = dfpitcher.drop('playerid', axis=1)
+
+# Get the list of columns to zscore
+numbers2 = dfpitcher.select_dtypes(include='number').columns
+
+# Zscore the columns
+dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
+
+# Add a column for the total z-score
+dfpitcher['Total Z-Score'] = dfpitcher.sum(axis = 1).round(2)
+dfpitcher = dfpitcher.merge(temp_df2[['Name', 'playerid']], on=["Name"], how="left")
+
+print(dfpitcher)
+
 today = date.today()
 today = datetime.strptime('2023-10-31', '%Y-%m-%d').date() # pinning to last day of baseball season
 
 def hitters_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
-    # df = pd.read_csv(filepath, index_col=["Name"])
+
+    df['Barrel%'] = df['Barrel%'] = df['Barrel%'].str.rstrip('%').astype('float')
+    filter = df[(df['PA'] > 10)]
 
     df.columns = df.columns.str.replace('[+,-,%,]', '', regex=True)
     df.rename(columns={'K%-': 'K', 'BB%-': 'BB'}, inplace=True)
     df.fillna(0)
     df.reset_index(inplace=True)
     df = df[~df['playerid'].isin(excluded['playerid'])]
-    df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
+    df = df.merge(dfhitter[['playerid', 'Total Z-Score']], on=["playerid"], how="left")
+
+    # df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
 
     filters = df[(df['wRC'] > 135) & (df['OPS'] > .8) & (df['K'] < 95) & (df['BB'] > 100) & (df['Off'] > 1) & (
                 df['Barrel'] > 10)].sort_values(by='Off', ascending=False)
@@ -44,6 +82,7 @@ def pitchers_preprocessing(filepath):
     df.fillna(0)
     df.reset_index(inplace=True)
     df = df[~df['playerid'].isin(excluded['playerid'])]
+    df = df.merge(dfpitcher[['playerid', 'Total Z-Score']], on=["playerid"], how="left")
 
     df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
     df['CSW'] = df['CSW'] = df['CSW'].str.rstrip('%').astype('float')
