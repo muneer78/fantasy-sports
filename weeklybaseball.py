@@ -22,7 +22,10 @@ excluded = pd.read_csv('excluded.csv')
 
 dfhitter = pd.read_csv('hitter.csv')
 temp_df = dfhitter[['Name', 'playerid']]
-dfhitter = dfhitter.drop('playerid', axis=1)
+dfhitter = dfhitter.drop(columns = ['playerid', 'mlbamid'])
+columns = ['BABIP+', 'K%+', 'BB%+', 'ISO+', 'wRC+', 'Barrels']
+dfhitter = dfhitter.fillna(0)
+dfhitter[columns] = dfhitter[columns].astype('float')
 
 # Get the list of columns to zscore
 numbers = dfhitter.select_dtypes(include='number').columns
@@ -38,7 +41,11 @@ dfhitter.to_csv('hitterz.csv',index=False)
 
 dfpitcher = pd.read_csv('pitcher.csv')
 temp_df2 = dfpitcher[['Name', 'playerid']]
-dfpitcher = dfpitcher.drop('playerid', axis=1)
+dfpitcher = dfpitcher.drop(columns = ['playerid', 'mlbamid'])
+dfpitcher = dfpitcher.fillna(0)
+
+columns2 = ['Stuff+', 'Location+', 'Pitching+', 'Starting', 'Relieving']
+dfpitcher[columns2] = dfpitcher[columns2].astype('float')
 
 # Get the list of columns to zscore
 numbers2 = dfpitcher.select_dtypes(include='number').columns
