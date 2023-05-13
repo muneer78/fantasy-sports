@@ -13,6 +13,8 @@ comp_dict = {'FanGraphs Leaderboard.csv': 'fgl_pitchers_10_ip.csv',
             'FanGraphs Leaderboard (4).csv': 'fgl_hitters_last_7.csv',
             'FanGraphs Leaderboard (5).csv': 'fgl_pitchers_last_14.csv',
             'FanGraphs Leaderboard (6).csv': 'fgl_pitchers_last_30.csv',
+            'FanGraphs Leaderboard (7).csv': 'hitter.csv',
+            'FanGraphs Leaderboard (8).csv': 'pitcher.csv'
              }
 
 for newname, oldname in comp_dict.items():
@@ -82,7 +84,7 @@ def hitters_preprocessing(filepath):
                 df['Barrel'] > 10)].sort_values(by='Off', ascending=False)
     return filters
 
-def pitchers_preprocessing(filepath):
+def sp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
     df.columns = df.columns.str.replace('[+,-,%,]', '', regex=True)
@@ -96,8 +98,26 @@ def pitchers_preprocessing(filepath):
     df['CSW'] = df['CSW'] = df['CSW'].str.rstrip('%').astype('float')
 
     filters1 = df[(df['Barrel'] < 7) & (df['Starting'] > 5) & (df['GS'] > 1) & (df['Pitching'] > 99)].sort_values(by='Starting', ascending=False)
-    filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 1) & (df['Pitching'] > 99)].sort_values(by='Relieving', ascending=False)
+ #   filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 1) & (df['Pitching'] > 99)].sort_values(by='Relieving', ascending=False)
     return filters1
+ #   return filters2
+
+def rp_preprocessing(filepath):
+    df = pd.read_csv(filepath, index_col=["playerid"])
+
+    df.columns = df.columns.str.replace('[+,-,%,]', '', regex=True)
+    df.rename(columns={'K/BB': 'KToBB', 'HR/9': 'HRPer9', 'xFIP-': 'XFIPMinus'}, inplace=True)
+    df.fillna(0)
+    df.reset_index(inplace=True)
+    df = df[~df['playerid'].isin(excluded['playerid'])]
+    df = df.merge(dfpitcher[['playerid', 'Total Z-Score']], on=["playerid"], how="left")
+
+    df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
+    df['CSW'] = df['CSW'] = df['CSW'].str.rstrip('%').astype('float')
+
+#    filters1 = df[(df['Barrel'] < 7) & (df['Starting'] > 5) & (df['GS'] > 1) & (df['Pitching'] > 99)].sort_values(by='Starting', ascending=False)
+    filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 5) & (df['Pitching'] > 99)].sort_values(by='Relieving', ascending=False)
+ #   return filters1
     return filters2
 
 # Preprocess and export the dataframes to Excel workbook sheets
@@ -124,15 +144,25 @@ with open('weeklyadds.csv', 'w+') as f:
         f.write('\n')
 
     for w in ipwindow:
-        f.write(f'Pitchers Last {w} Innings\n\n')
-        df = pitchers_preprocessing(f'fgl_pitchers_{w}_ip.csv')
+        f.write(f'SP {w} Innings\n\n')
+        df = sp_preprocessing(f'fgl_pitchers_{w}_ip.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
+        f.write(f'RP {w} Innings\n\n')
+        df = rp_preprocessing(f'fgl_pitchers_{w}_ip.csv')
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write('\n')
 
     for w in pitchdaywindow:
         f.write(f'Pitchers Last {w} Days\n\n')
-        df = pitchers_preprocessing(f'fgl_pitchers_last_{w}.csv')
+        df = sp_preprocessing(f'fgl_pitchers_last_{w}.csv')
+        df_list.append(df)
+        df.to_csv(f, index=False)
+        f.write('\n')
+        f.write(f'RP Last {w} Days\n\n')
+        df = rp_preprocessing(f'fgl_pitchers_last_{w}.csv')
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write('\n')
