@@ -55,7 +55,7 @@ dfpitcher[columns2] = dfpitcher[columns2].astype("float")
 numbers2 = dfpitcher.select_dtypes(include="number").columns
 
 # Zscore the columns
-dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
+dfpitcher[numbers2] = (dfpitcher[numbers2].apply(stats.zscore) * 2.5)
 
 # Add a column for the total z-score
 dfpitcher["Total Z-Score"] = dfpitcher.sum(axis=1).round(2)
