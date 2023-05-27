@@ -116,8 +116,8 @@ def sp_preprocessing(filepath):
         & (df["Starting"] > 5)
         & (df["GS"] > 1)
         & (df["Pitching"] > 99)
+        & (df["Total Z-Score"] > 8)
     ].sort_values(by="Starting", ascending=False)
-    #   filters2 = df[(df['Barrel'] < 7) & (df['Relieving'] > 1) & (df['Pitching'] > 99)].sort_values(by='Relieving', ascending=False)
     return filters1
 
 
@@ -139,9 +139,8 @@ def rp_preprocessing(filepath):
     df["Barrel"] = df["Barrel"] = df["Barrel"].str.rstrip("%").astype("float")
     df["CSW"] = df["CSW"] = df["CSW"].str.rstrip("%").astype("float")
 
-    #    filters1 = df[(df['Barrel'] < 7) & (df['Starting'] > 5) & (df['GS'] > 1) & (df['Pitching'] > 99)].sort_values(by='Starting', ascending=False)
     filters2 = df[
-        (df["Barrel"] < 7) & (df["Relieving"] > 5) & (df["Pitching"] > 99)
+        (df["Barrel"] < 7) & (df["Total Z-Score"] > 8) & (df["Relieving"] > 0) & (df["Pitching"] > 99)
     ].sort_values(by="Relieving", ascending=False)
     #   return filters1
     return filters2
@@ -159,6 +158,7 @@ with open("weeklyadds.csv", "w+") as f:
     for w in hitdaywindow:
         f.write(f"Hitters Last {w} Days\n\n")
         df = hitters_preprocessing(f"fgl_hitters_last_{w}.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -166,6 +166,7 @@ with open("weeklyadds.csv", "w+") as f:
     for w in pawindow:
         f.write(f"Hitters {w} PA\n\n")
         df = hitters_preprocessing(f"fgl_hitters_{w}_pa.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -173,11 +174,13 @@ with open("weeklyadds.csv", "w+") as f:
     for w in ipwindow:
         f.write(f"SP {w} Innings\n\n")
         df = sp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
         f.write(f"RP {w} Innings\n\n")
         df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -185,11 +188,13 @@ with open("weeklyadds.csv", "w+") as f:
     for w in pitchdaywindow:
         f.write(f"Pitchers Last {w} Days\n\n")
         df = sp_preprocessing(f"fgl_pitchers_last_{w}.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
         f.write(f"RP Last {w} Days\n\n")
         df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
+        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
