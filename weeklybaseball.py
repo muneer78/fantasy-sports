@@ -70,7 +70,7 @@ today = datetime.strptime(
 ).date()  # pinning to last day of baseball season
 
 
-def hitters_preprocessing(filepath):
+def hitters_wk_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
     df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
@@ -88,13 +88,38 @@ def hitters_preprocessing(filepath):
     filters = df[
         (df["wRC"] > 135)
         & (df["OPS"] > 0.8)
-        & (df["K"] < 95)
+        & (df["K"] < 100)
         & (df["BB"] > 100)
-        & (df["Off"] > 1)
+        & (df["Off"] > 3)
         & (df["Barrel"] > 10)
     ].sort_values(by="Off", ascending=False)
     return filters
 
+def hitters_pa_preprocessing(filepath):
+    df = pd.read_csv(filepath, index_col=["playerid"])
+
+    df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
+    filter = df[(df["PA"] > 10)]
+
+    df.columns = df.columns.str.replace("[+,-,%,]", "", regex=True)
+    df.rename(columns={"K%-": "K", "BB%-": "BB"}, inplace=True)
+    df.fillna(0)
+    df.reset_index(inplace=True)
+    df = df[~df["playerid"].isin(excluded["playerid"])]
+    df = df.merge(dfhitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
+
+    # df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
+
+    filters = df[
+        (df["wRC"] > 115)
+        & (df["OPS"] > 0.8)
+        & (df["K"] < 110)
+        & (df["BB"] > 90)
+        & (df["Off"] > 5)
+        & (df["Barrel"] > 10)
+        & (df["PA"] > 40)
+    ].sort_values(by="Off", ascending=False)
+    return filters
 
 def sp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
@@ -120,10 +145,6 @@ def sp_preprocessing(filepath):
     ].sort_values(by="Starting", ascending=False)
     return filters1
 
-
-#   return filters2
-
-
 def rp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
@@ -142,7 +163,6 @@ def rp_preprocessing(filepath):
     filters2 = df[
         (df["Barrel"] < 7) & (df["Total Z-Score"] > 8) & (df["Relieving"] > 0) & (df["Pitching"] > 99)
     ].sort_values(by="Relieving", ascending=False)
-    #   return filters1
     return filters2
 
 
@@ -157,7 +177,7 @@ df_list = []
 with open("weeklyadds.csv", "w+") as f:
     for w in hitdaywindow:
         f.write(f"Hitters Last {w} Days\n\n")
-        df = hitters_preprocessing(f"fgl_hitters_last_{w}.csv")
+        df = hitters_wk_preprocessing(f"fgl_hitters_last_{w}.csv")
         df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
@@ -165,8 +185,8 @@ with open("weeklyadds.csv", "w+") as f:
 
     for w in pawindow:
         f.write(f"Hitters {w} PA\n\n")
-        df = hitters_preprocessing(f"fgl_hitters_{w}_pa.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = hitters_pa_preprocessing(f"fgl_hitters_{w}_pa.csv")
+        df = df.sort_values (by = "Total Z-Score", ascending=False)  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
