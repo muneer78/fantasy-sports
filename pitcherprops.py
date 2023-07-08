@@ -34,6 +34,9 @@ matching_dfktop25 = dfsched[dfsched['Name'].isin(dfktop25['Name'])]
 matching_dfktop25 = pd.merge(matching_dfktop25, dfktop25[['Name', 'K%+', 'BB%+']], on='Name', how='left')
 matching_dfbbtop25 = pd.merge(matching_dfbbtop25, dfbbtop25[['Name', 'K%+', 'BB%+']], on='Name', how='left')
 
+matching_dfktop25 = matching_dfktop25.sort_values(by='K%+', ascending=False)
+matching_dfbbtop25 = matching_dfbbtop25.sort_values(by = 'BB%+', ascending = True)
+
 print("Low walk props to explore:")
 print(matching_dfbbtop25)
 print(" ")
