@@ -1,10 +1,13 @@
+"""
+Use pandas to work with dataframes,
+datetime to enter date with f-string,
+and scipy stats to calculate z-score
+"""
+
 import pandas as pd
 from datetime import date, datetime, timedelta
 import os
-import csv
-
-# from scipy import stats
-import scipy.stats as stats
+from scipy import stats
 
 # define dictionary
 comp_dict = {
@@ -55,7 +58,7 @@ dfpitcher[columns2] = dfpitcher[columns2].astype("float")
 numbers2 = dfpitcher.select_dtypes(include="number").columns
 
 # Zscore the columns
-dfpitcher[numbers2] = (dfpitcher[numbers2].apply(stats.zscore) * 2.5)
+dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore) * 2.5
 
 # Add a column for the total z-score
 dfpitcher["Total Z-Score"] = dfpitcher.sum(axis=1).round(2)
@@ -71,29 +74,29 @@ today = datetime.strptime(
 
 
 def hitters_wk_preprocessing(filepath):
-    df = pd.read_csv(filepath, index_col=["playerid"])
+    '''Creates weekly hitter calcs'''
+    dftemp = pd.read_csv(filepath, index_col=["playerid"])
 
-    df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
-    filter = df[(df["PA"] > 10)]
+    dftemptemp["Barrel%"] = dftemp["Barrel%"] = dftemp["Barrel%"].str.rstrip("%").astype("float")
+    filter = dftemp[(dftemp["PA"] > 10)]
 
-    df.columns = df.columns.str.replace("[+,-,%,]", "", regex=True)
-    df.rename(columns={"K%-": "K", "BB%-": "BB"}, inplace=True)
-    df.fillna(0)
-    df.reset_index(inplace=True)
-    df = df[~df["playerid"].isin(excluded["playerid"])]
-    df = df.merge(dfhitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
+    dftemp.columns = dftemp.columns.str.replace("[+,-,%,]", "", regex=True)
+    dftemp.rename(columns={"K%-": "K", "BB%-": "BB"}, inplace=True)
+    dftemp.fillna(0)
+    dftemp.reset_index(inplace=True)
+    dftemp = dftemp[~dftemp["playerid"].isin(excluded["playerid"])]
+    dftemp = dftemp.merge(dftemphitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
 
-    # df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
-
-    filters = df[
-        (df["wRC"] > 135)
-        & (df["OPS"] > 0.8)
-        & (df["K"] < 100)
-        & (df["BB"] > 100)
-        & (df["Off"] > 3)
-        & (df["Barrel"] > 10)
+    filters = dftemp[
+        (dftemp["wRC"] > 135)
+        & (dftemp["OPS"] > 0.8)
+        & (dftemp["K"] < 100)
+        & (dftemp["BB"] > 100)
+        & (dftemp["Off"] > 3)
+        & (dftemp["Barrel"] > 10)
     ].sort_values(by="Off", ascending=False)
     return filters
+
 
 def hitters_pa_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
@@ -121,6 +124,7 @@ def hitters_pa_preprocessing(filepath):
     ].sort_values(by="Off", ascending=False)
     return filters
 
+
 def sp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
@@ -145,6 +149,7 @@ def sp_preprocessing(filepath):
     ].sort_values(by="Starting", ascending=False)
     return filters1
 
+
 def rp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
 
@@ -161,7 +166,10 @@ def rp_preprocessing(filepath):
     df["CSW"] = df["CSW"] = df["CSW"].str.rstrip("%").astype("float")
 
     filters2 = df[
-        (df["Barrel"] < 7) & (df["Total Z-Score"] > 8) & (df["Relieving"] > 0) & (df["Pitching"] > 99)
+        (df["Barrel"] < 7)
+        & (df["Total Z-Score"] > 8)
+        & (df["Relieving"] > 0)
+        & (df["Pitching"] > 99)
     ].sort_values(by="Relieving", ascending=False)
     return filters2
 
@@ -178,7 +186,9 @@ with open("weeklyadds.csv", "w+") as f:
     for w in hitdaywindow:
         f.write(f"Hitters Last {w} Days\n\n")
         df = hitters_wk_preprocessing(f"fgl_hitters_last_{w}.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -186,7 +196,9 @@ with open("weeklyadds.csv", "w+") as f:
     for w in pawindow:
         f.write(f"Hitters {w} PA\n\n")
         df = hitters_pa_preprocessing(f"fgl_hitters_{w}_pa.csv")
-        df = df.sort_values (by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -194,13 +206,17 @@ with open("weeklyadds.csv", "w+") as f:
     for w in ipwindow:
         f.write(f"SP {w} Innings\n\n")
         df = sp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
         f.write(f"RP {w} Innings\n\n")
         df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
@@ -208,13 +224,17 @@ with open("weeklyadds.csv", "w+") as f:
     for w in pitchdaywindow:
         f.write(f"Pitchers Last {w} Days\n\n")
         df = sp_preprocessing(f"fgl_pitchers_last_{w}.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
         f.write(f"RP Last {w} Days\n\n")
         df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
-        df = df.sort_values ( by = "Total Z-Score", ascending=False)  # Sort by Zscore column
+        df = df.sort_values(
+            by="Total Z-Score", ascending=False
+        )  # Sort by Zscore column
         df_list.append(df)
         df.to_csv(f, index=False)
         f.write("\n")
