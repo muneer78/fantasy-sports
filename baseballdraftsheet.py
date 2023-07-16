@@ -1,3 +1,8 @@
+"""
+Pandas creates and works with the dataframes
+scipy does the z-score calcs
+numpy does some additional stats processing pandas can't do
+"""
 import pandas as pd
 from scipy import stats
 import numpy as np
@@ -45,7 +50,7 @@ df = pd.read_csv("hitter.csv", index_col=["playerid"])  # Preseason Hitters
 
 df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
 
-filter = df[(df["PA"] > 250) & (df["HR"] > 5)]
+filter1 = df[(df["PA"] > 250) & (df["HR"] > 5)]
 
 numbers = df.select_dtypes(include="number").columns
 df[numbers] = df[numbers].apply(stats.zscore)
@@ -65,14 +70,20 @@ dffghit = pd.read_csv("fg.csv")
 dflaghezza = pd.read_csv("laghezza.csv")
 
 dflist = [dffgpit, dfzpit, dfzhit, dfadp, dfstuff, dffghit, dflaghezza]
-for index in range(len(dflist)):
-    dflist[index].replace(r"[^\w\s]|_\*", "", regex=True, inplace=True)
-    dflist[index].replace(" Jr", "", regex=True, inplace=True)
-    dflist[index].replace(" II", "", regex=True, inplace=True)
+for index, df in enumerate(dflist):
+    df.replace(r"[^\w\s]|_\*", "", regex=True, inplace=True)
+    df.replace(" Jr", "", regex=True, inplace=True)
+    df.replace(" II", "", regex=True, inplace=True)
 
 dfadp = dfadp.astype(str)
 
-func = lambda x: "".join([i[:3] for i in x.strip().split(" ")])
+
+def func(player_name):
+    """
+    Fix player names in all dataframes
+    """
+    return "".join([i[:3] for i in player_name.strip().split(" ")])
+
 dffgpit["Key"] = dffgpit.Name.apply(func)
 dfstuff["Key"] = dfstuff.player_name.apply(func)
 dfadp["Key"] = dfadp.Player.apply(func)
@@ -82,7 +93,7 @@ dffghit["Key"] = dffghit.Name.apply(func)
 dflaghezza["Key"] = dflaghezza.Name.apply(func)
 
 dflist2 = [dffgpit, dfzpit, dfadp, dfstuff]
-for index in range(len(dflist2)):
+for index, df in enumerate(dflist):
     dflist2[index].columns.str.strip()
 
 dfadp = dfadp.drop(["ESPN", "CBS", "RTS", "NFBC", "FT"], axis=1)
