@@ -1,17 +1,23 @@
-import re
-import pandas as pd
 """
 Provides some arithmetic functions and ability to use regex
 """
 
+import re
+import pandas as pd
+
 dfsched = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1])
 dfprops = pd.read_csv("FanGraphs Leaderboard.csv")
+
+dfprops['K/GS'] = dfprops['SO'] / dfprops['GS']
+dfprops [ 'K/GS' ] = dfprops['K/GS'].round(2)
+dfprops['BB/GS'] = dfprops['BB'] / dfprops['GS']
+dfprops['BB/GS'] = dfprops['BB/GS'].round(2)
 
 dfsched.rename(columns={dfsched.columns[1]: "Name"}, inplace=True)
 dfsched = dfsched.fillna(0)
 
 dfopponents = pd.read_csv(
-    "FanGraphs Leaderboard(10).csv", usecols=["Team", "K%", "BB%"]
+    "FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"]
 )
 
 dfopponents["K%"] = dfopponents["K%"].str.rstrip("%").astype(float)
@@ -76,20 +82,14 @@ matching_dfktop25 = dfsched[
 ]
 
 matching_dfktop25 = pd.merge(
-    matching_dfktop25, dfktop25[["Name", "K%+", "BB%+"]], on="Name", how="left"
+    matching_dfktop25, dfktop25[["Name", "K%+", "BB%+", "xFIP", "K/GS"]], on="Name", how="left"
 )
 matching_dfbbtop25 = pd.merge(
-    matching_dfbbtop25, dfbbtop25[["Name", "K%+", "BB%+"]], on="Name", how="left"
+    matching_dfbbtop25, dfbbtop25[["Name", "K%+", "BB%+", "xFIP", "BB/GS"]], on="Name", how="left"
 )
 
 matching_dfktop25 = matching_dfktop25.sort_values(by="K%+", ascending=False)
 matching_dfbbtop25 = matching_dfbbtop25.sort_values(by="BB%+", ascending=True)
-
-# print("Low walk props to explore:")
-# print(matching_dfbbtop25)
-# print(" ")
-# print("High strikeout props to explore:")
-# print(matching_dfktop25)
 
 list_of_dfs = [matching_dfktop25, matching_dfbbtop25]
 
