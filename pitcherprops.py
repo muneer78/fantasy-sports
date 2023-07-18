@@ -5,7 +5,7 @@ Provides some arithmetic functions and ability to use regex
 import re
 import pandas as pd
 
-dfsched = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1])
+dfsched = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1, 2])
 dfprops = pd.read_csv("FanGraphs Leaderboard.csv")
 
 dfprops['K/GS'] = dfprops['SO'] / dfprops['GS']
@@ -13,8 +13,11 @@ dfprops [ 'K/GS' ] = dfprops['K/GS'].round(2)
 dfprops['BB/GS'] = dfprops['BB'] / dfprops['GS']
 dfprops['BB/GS'] = dfprops['BB/GS'].round(2)
 
-dfsched.rename(columns={dfsched.columns[1]: "Name"}, inplace=True)
+dfsched.rename(columns={dfsched.columns[2]: "Name"}, inplace=True)
 dfsched = dfsched.fillna(0)
+
+# Delete the second column
+dfsched = dfsched.drop(dfsched.columns[1], axis=1)
 
 dfopponents = pd.read_csv(
     "FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"]
