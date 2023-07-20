@@ -1,9 +1,3 @@
-"""
-Use pandas to work with dataframes,
-datetime to enter date with f-string,
-and scipy stats to calculate z-score
-"""
-
 import pandas as pd
 from datetime import date, datetime, timedelta
 import os
@@ -27,44 +21,48 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv("excluded.csv")
 
-dfhitter = pd.read_csv("hitter.csv")
-temp_df = dfhitter[["Name", "playerid"]]
-dfhitter = dfhitter.drop(columns=["playerid", "mlbamid"])
-columns = ["BABIP+", "K%+", "BB%+", "ISO+", "wRC+", "Barrels"]
+dfhitter = pd.read_csv('hitter.csv')
+dfhitter['Barrel%'] = dfhitter['Barrel%'] = dfhitter['Barrel%'].str.rstrip('%').astype('float64')
+temp_df = dfhitter[['Name', 'playerid']]
+dfhitter = dfhitter.drop(columns = ['playerid', 'mlbamid'])
+columns = ["PA", "HR", "SB", 'BABIP+', 'K%+', 'BB%+', 'ISO+', 'wRC+', 'Barrels', "Barrel%"]
 dfhitter = dfhitter.fillna(0)
-dfhitter[columns] = dfhitter[columns].astype("float")
+dfhitter[columns] = dfhitter[columns].astype('float')
 
 # Get the list of columns to zscore
-numbers = dfhitter.select_dtypes(include="number").columns
+numbers = dfhitter.select_dtypes(include='number').columns
 
 # Zscore the columns
 dfhitter[numbers] = dfhitter[numbers].apply(stats.zscore)
 
+print(dfhitter.dtypes)
+
 # Add a column for the total z-score
-dfhitter["Total Z-Score"] = dfhitter.sum(axis=1).round(2)
-dfhitter = dfhitter.merge(temp_df[["Name", "playerid"]], on=["Name"], how="left")
+dfhitter['Total Z-Score'] = pd.Series(dtype=float)
+print(dfhitter.dtypes)
+dfhitter['Total Z-Score'] = dfhitter[numbers].sum(axis=1).round(2)
+dfhitter = dfhitter.merge(temp_df[['Name', 'playerid']], on=["Name"], how="left")
 
-dfhitter.to_csv("hitterz.csv", index=False)
+dfhitter.to_csv('hitterz.csv',index=False)
 
-dfpitcher = pd.read_csv("pitcher.csv")
-temp_df2 = dfpitcher[["Name", "playerid"]]
-dfpitcher = dfpitcher.drop(columns=["playerid", "mlbamid"])
+dfpitcher = pd.read_csv('pitcher.csv')
+temp_df2 = dfpitcher[['Name', 'playerid']]
+dfpitcher = dfpitcher.drop(columns = ['playerid', 'mlbamid'])
 dfpitcher = dfpitcher.fillna(0)
 
-columns2 = ["Stuff+", "Location+", "Pitching+", "Starting", "Relieving"]
-dfpitcher[columns2] = dfpitcher[columns2].astype("float")
+columns2 = ['Stuff+', 'Location+', 'Pitching+', 'Starting', 'Relieving']
+dfpitcher[columns2] = dfpitcher[columns2].astype('float')
 
 # Get the list of columns to zscore
-numbers2 = dfpitcher.select_dtypes(include="number").columns
+numbers2 = dfpitcher.select_dtypes(include='number').columns
 
 # Zscore the columns
-dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore) * 2.5
+dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
 
 # Add a column for the total z-score
-dfpitcher["Total Z-Score"] = dfpitcher.sum(axis=1).round(2)
-dfpitcher = dfpitcher.merge(temp_df2[["Name", "playerid"]], on=["Name"], how="left")
-
-dfpitcher.to_csv("pitcherz.csv", index=False)
+dfpitcher['Total Z-Score'] = dfpitcher[numbers2].sum(axis = 1).round(2)
+dfpitcher = dfpitcher.merge(temp_df2[['Name', 'playerid']], on=["Name"], how="left")
+dfpitcher.to_csv('pitcherz.csv', index=False)
 print(dfpitcher)
 
 today = date.today()
@@ -72,28 +70,27 @@ today = datetime.strptime(
     "2023-10-31", "%Y-%m-%d"
 ).date()  # pinning to last day of baseball season
 
-
 def hitters_wk_preprocessing(filepath):
     '''Creates weekly hitter calcs'''
-    dftemp = pd.read_csv(filepath, index_col=["playerid"])
+    df = pd.read_csv(filepath, index_col=["playerid"])
 
-    dftemptemp["Barrel%"] = dftemp["Barrel%"] = dftemp["Barrel%"].str.rstrip("%").astype("float")
-    filter = dftemp[(dftemp["PA"] > 10)]
+    df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
+    filter = df[(df["PA"] > 10)]
 
-    dftemp.columns = dftemp.columns.str.replace("[+,-,%,]", "", regex=True)
-    dftemp.rename(columns={"K%-": "K", "BB%-": "BB"}, inplace=True)
-    dftemp.fillna(0)
-    dftemp.reset_index(inplace=True)
-    dftemp = dftemp[~dftemp["playerid"].isin(excluded["playerid"])]
-    dftemp = dftemp.merge(dftemphitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
+    df.columns = df.columns.str.replace("[+,-,%,]", "", regex=True)
+    df.rename(columns={"K%-": "K", "BB%-": "BB"}, inplace=True)
+    df.fillna(0)
+    df.reset_index(inplace=True)
+    df = df[~df["playerid"].isin(excluded["playerid"])]
+    df = df.merge(dfhitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
 
-    filters = dftemp[
-        (dftemp["wRC"] > 135)
-        & (dftemp["OPS"] > 0.8)
-        & (dftemp["K"] < 100)
-        & (dftemp["BB"] > 100)
-        & (dftemp["Off"] > 3)
-        & (dftemp["Barrel"] > 10)
+    filters = df[
+        (df["wRC"] > 135)
+        & (df["OPS"] > 0.8)
+        & (df["K"] < 100)
+        & (df["BB"] > 100)
+        & (df["Off"] > 3)
+        & (df["Barrel"] > 10)
     ].sort_values(by="Off", ascending=False)
     return filters
 
@@ -148,7 +145,6 @@ def sp_preprocessing(filepath):
         & (df["Total Z-Score"] > 8)
     ].sort_values(by="Starting", ascending=False)
     return filters1
-
 
 def rp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["playerid"])
