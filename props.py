@@ -9,9 +9,16 @@ dfsched = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1, 2])
 dfprops = pd.read_csv("FanGraphs Leaderboard.csv")
 
 dfprops['K/GS'] = dfprops['SO'] / dfprops['GS']
-dfprops [ 'K/GS' ] = dfprops['K/GS'].round(2)
+dfprops ['K/GS' ] = dfprops['K/GS'].round(2)
 dfprops['BB/GS'] = dfprops['BB'] / dfprops['GS']
 dfprops['BB/GS'] = dfprops['BB/GS'].round(2)
+dfprops['IP/G'] = dfprops['IP'] / dfprops['GS']
+dfprops['IP/G'] = dfprops['IP/G'].round(0)
+
+# Filter rows where GS > 1
+dfprops = dfprops.loc[(dfprops['GS'] > 1) & (dfprops['IP/G'] > 5)]
+# dfprops = dfprops.loc[dfprops['GS'] > 1]
+print(dfprops)
 
 dfsched.rename(columns={dfsched.columns[2]: "Name"}, inplace=True)
 dfsched = dfsched.fillna(0)
