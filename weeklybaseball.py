@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 import os
 from scipy import stats
 
-# define dictionary
+# # define dictionary
 comp_dict = {
     "FanGraphs Leaderboard.csv": "fgl_pitchers_10_ip.csv",
     "FanGraphs Leaderboard (1).csv": "fgl_pitchers_30_ip.csv",
@@ -35,15 +35,10 @@ numbers = dfhitter.select_dtypes(include='number').columns
 # Zscore the columns
 dfhitter[numbers] = dfhitter[numbers].apply(stats.zscore)
 
-print(dfhitter.dtypes)
-
 # Add a column for the total z-score
 dfhitter['Total Z-Score'] = pd.Series(dtype=float)
-print(dfhitter.dtypes)
 dfhitter['Total Z-Score'] = dfhitter[numbers].sum(axis=1).round(2)
 dfhitter = dfhitter.merge(temp_df[['Name', 'playerid']], on=["Name"], how="left")
-
-dfhitter.to_csv('hitterz.csv',index=False)
 
 dfpitcher = pd.read_csv('pitcher.csv')
 temp_df2 = dfpitcher[['Name', 'playerid']]
@@ -60,10 +55,9 @@ numbers2 = dfpitcher.select_dtypes(include='number').columns
 dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
 
 # Add a column for the total z-score
-dfpitcher['Total Z-Score'] = dfpitcher[numbers2].sum(axis = 1).round(2)
+dfpitcher['Total Z-Score'] = pd.Series(dtype=float)
+dfpitcher['Total Z-Score'] = dfpitcher[numbers2].sum(axis=1).round(2)
 dfpitcher = dfpitcher.merge(temp_df2[['Name', 'playerid']], on=["Name"], how="left")
-dfpitcher.to_csv('pitcherz.csv', index=False)
-print(dfpitcher)
 
 today = date.today()
 today = datetime.strptime(
@@ -107,8 +101,6 @@ def hitters_pa_preprocessing(filepath):
     df.reset_index(inplace=True)
     df = df[~df["playerid"].isin(excluded["playerid"])]
     df = df.merge(dfhitter[["playerid", "Total Z-Score"]], on=["playerid"], how="left")
-
-    # df['Barrel'] = df['Barrel'] = df['Barrel'].str.rstrip('%').astype('float')
 
     filters = df[
         (df["wRC"] > 115)
