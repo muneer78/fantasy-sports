@@ -101,7 +101,7 @@ matching_dfbbtop25 = matching_dfbbtop25.sort_values(by="BB%+", ascending=True)
 Code to show today's plays
 '''''
 
-dfsched2 = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1, 2])
+dfsched2 = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1])
 dfprops2 = pd.read_csv("FanGraphs Leaderboard.csv")
 
 dfprops2['K/GS'] = dfprops2['SO'] / dfprops2['GS']
@@ -126,6 +126,7 @@ dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
 
 dfopponents2.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
 
+
 # Add a new column called "KRank"
 dfopponents2["KRank"] = range(1, len(dfopponents) + 1)
 
@@ -135,7 +136,7 @@ dfopponents2["BBRank"] = range(1, len(dfopponents2) + 1)
 
 dfsched2["Name"] = dfsched2["Name"].str.strip()
 opposing_teams2 = dfsched2.iloc[:, 1].str.split("\n").str[0]
-dfsched2["OpposingTeam"] = opposing_teams
+dfsched2["OpposingTeam"] = opposing_teams2
 dfsched2["OpposingTeam"] = dfsched2["OpposingTeam"].str.replace("@ ", "")
 
 """
@@ -161,9 +162,6 @@ def remove_text(cell_value):
 
 
 dfsched2 = dfsched2.applymap(remove_text)
-
-# Delete the second column from dfsched2
-dfsched2 = dfsched2.drop(dfsched2.columns[2], axis=1)
 
 # Generate dfopponents again
 dfopponents2 = pd.read_csv("FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"])
