@@ -24,7 +24,7 @@ df1 = df1.fillna(value=0)
 df1['playerid'] = df1['playerid_x'].mask(df1['playerid_x'].eq(0), df1['playerid_y'])
 df1['playerid'] = df1['playerid'].astype(int)
 
-df1 = df1[['Player', 'playerid']]
+df1 = df1[['playerid','Player']]
 result = df1[:75]
 
 result.to_csv('excluded.csv', index=False)
