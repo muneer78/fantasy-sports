@@ -5,15 +5,15 @@ from scipy import stats
 
 # # define dictionary
 comp_dict = {
-    "FanGraphs Leaderboard.csv": "fgl_pitchers_10_ip.csv",
-    "FanGraphs Leaderboard (1).csv": "fgl_pitchers_30_ip.csv",
-    "FanGraphs Leaderboard (2).csv": "fgl_hitters_40_pa.csv",
-    "FanGraphs Leaderboard (3).csv": "fgl_hitters_last_14.csv",
-    "FanGraphs Leaderboard (4).csv": "fgl_hitters_last_7.csv",
-    "FanGraphs Leaderboard (5).csv": "fgl_pitchers_last_14.csv",
-    "FanGraphs Leaderboard (6).csv": "fgl_pitchers_last_30.csv",
-    "FanGraphs Leaderboard (7).csv": "hitter.csv",
-    "FanGraphs Leaderboard (8).csv": "pitcher.csv",
+    "fangraphs-leaderboards.csv": "fgl_pitchers_10_ip.csv",
+    "fangraphs-leaderboards (1).csv": "fgl_pitchers_30_ip.csv",
+    "fangraphs-leaderboards (2).csv": "fgl_hitters_40_pa.csv",
+    "fangraphs-leaderboards (3).csv": "fgl_hitters_last_14.csv",
+    "fangraphs-leaderboards (4).csv": "fgl_hitters_last_7.csv",
+    "fangraphs-leaderboards (5).csv": "fgl_pitchers_last_14.csv",
+    "fangraphs-leaderboards (6).csv": "fgl_pitchers_last_30.csv",
+    "fangraphs-leaderboards (7).csv": "hitter.csv",
+    "fangraphs-leaderboards (8).csv": "pitcher.csv",
 }
 
 for newname, oldname in comp_dict.items():

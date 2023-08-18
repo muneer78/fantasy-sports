@@ -6,7 +6,7 @@ import re
 import pandas as pd
 
 dfsched = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1, 2])
-dfprops = pd.read_csv("FanGraphs Leaderboard.csv")
+dfprops = pd.read_csv("fangraphs-leaderboards.csv")
 
 dfprops['K/GS'] = dfprops['SO'] / dfprops['GS']
 dfprops ['K/GS' ] = dfprops['K/GS'].round(2)
@@ -25,11 +25,11 @@ dfsched = dfsched.fillna(0)
 dfsched = dfsched.drop(dfsched.columns[1], axis=1)
 
 dfopponents = pd.read_csv(
-    "FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"]
+    "fangraphs-leaderboards (1).csv", usecols=["Team", "K%", "BB%"]
 )
 
-dfopponents["K%"] = dfopponents["K%"].str.rstrip("%").astype(float)
-dfopponents["BB%"] = dfopponents["BB%"].str.rstrip("%").astype(float)
+# dfopponents["K%"] = dfopponents["K%"].str.rstrip("%").astype(float)
+# dfopponents["BB%"] = dfopponents["BB%"].str.rstrip("%").astype(float)
 
 dfopponents.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
 
@@ -102,7 +102,7 @@ Code to show today's plays
 '''''
 
 dfsched2 = pd.read_excel("roster-resource-download.xlsx", usecols=[0, 1])
-dfprops2 = pd.read_csv("FanGraphs Leaderboard.csv")
+dfprops2 = pd.read_csv("fangraphs-leaderboards.csv")
 
 dfprops2['K/GS'] = dfprops2['SO'] / dfprops2['GS']
 dfprops2 ['K/GS' ] = dfprops2['K/GS'].round(2)
@@ -118,11 +118,11 @@ dfsched2.rename(columns={dfsched2.columns[1]: "Name"}, inplace=True)
 dfsched2 = dfsched2.fillna(0)
 
 dfopponents2 = pd.read_csv(
-    "FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"]
+    "fangraphs-leaderboards (1).csv", usecols=["Team", "K%", "BB%"]
 )
 
-dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
-dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
+# dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
+# dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
 
 dfopponents2.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
 
@@ -164,11 +164,11 @@ def remove_text(cell_value):
 dfsched2 = dfsched2.applymap(remove_text)
 
 # Generate dfopponents again
-dfopponents2 = pd.read_csv("FanGraphs Leaderboard (1).csv", usecols=["Team", "K%", "BB%"])
+dfopponents2 = pd.read_csv("fangraphs-leaderboards (1).csv", usecols=["Team", "K%", "BB%"])
 
 # Update columns in dfopponents2
-dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
-dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
+# dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
+# dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
 
 # Sort and add ranking columns
 dfopponents2.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
