@@ -29,9 +29,6 @@ with pandas_log.enable():
     dfopponents = pd.read_csv("fangraphs-leaderboards (1).csv", usecols=[ "Team", "K%", "BB%" ]
     )
 
-    # dfopponents["K%"] = dfopponents["K%"].str.rstrip("%").astype(float)
-    # dfopponents["BB%"] = dfopponents["BB%"].str.rstrip("%").astype(float)
-
     dfopponents.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
 
     # Add a new column called "KRank"
@@ -122,8 +119,6 @@ with pandas_log.enable():
         "fangraphs-leaderboards (1).csv", usecols=[ "Team", "K%", "BB%" ]
     )
 
-    # dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
-    # dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
 
     dfopponents2.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
 
@@ -167,10 +162,6 @@ with pandas_log.enable():
     # Generate dfopponents again
     dfopponents2 = pd.read_csv( "fangraphs-leaderboards (1).csv", usecols=[ "Team", "K%", "BB%" ] )
 
-    # Update columns in dfopponents2
-    # dfopponents2["K%"] = dfopponents2["K%"].str.rstrip("%").astype(float)
-    # dfopponents2["BB%"] = dfopponents2["BB%"].str.rstrip("%").astype(float)
-
     # Sort and add ranking columns
     dfopponents2.sort_values("K%", ascending=False, ignore_index=True, inplace=True)
     dfopponents2["KRank"] = range(1, len(dfopponents2) + 1)
@@ -208,16 +199,16 @@ with pandas_log.enable():
 
     list_of_dfs = [matching_dfktop252, matching_dfbbtop252, matching_dfktop25, matching_dfbbtop25]
 
-    titles = [
-        "Pitcher High Strikeout Props Today",
-        "Pitcher Low BB Props Today",
-        "Pitcher High Strikeout Props Tomorrow",
-        "Pitcher Low BB Props Tomorrow",
-    ]
+titles = [
+    "Pitcher High Strikeout Props Today",
+    "Pitcher Low BB Props Today",
+    "Pitcher High Strikeout Props Tomorrow",
+    "Pitcher Low BB Props Tomorrow",
+]
 
-    with open("props.csv", "w+", encoding="utf8") as f:
-        for i, df in enumerate(list_of_dfs):
-            if not df.empty:  # Check if the dataframe is not empty
-                f.write(titles[i] + "\n")  # Write the title
-                df.to_csv(f, index=False)
-                f.write("\n")
+with open("props.csv", "w+", encoding="utf8") as f:
+    for i, df in enumerate(list_of_dfs):
+        if not df.empty:  # Check if the dataframe is not empty
+            f.write(titles[i] + "\n")  # Write the title
+            df.round(2).to_csv(f, index=False)  # Round numbers to 2 digits
+            f.write("\n")
