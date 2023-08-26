@@ -4,20 +4,20 @@ import os
 from scipy import stats
 
 # define dictionary
-comp_dict = {
-    "fangraphs-leaderboards.csv": "fgl_pitchers_10_ip.csv",
-    "fangraphs-leaderboards (1).csv": "fgl_pitchers_30_ip.csv",
-    "fangraphs-leaderboards (2).csv": "fgl_hitters_40_pa.csv",
-    "fangraphs-leaderboards (3).csv": "fgl_hitters_last_14.csv",
-    "fangraphs-leaderboards (4).csv": "fgl_hitters_last_7.csv",
-    "fangraphs-leaderboards (5).csv": "fgl_pitchers_last_14.csv",
-    "fangraphs-leaderboards (6).csv": "fgl_pitchers_last_30.csv",
-    "fangraphs-leaderboards (7).csv": "hitter.csv",
-    "fangraphs-leaderboards (8).csv": "pitcher.csv",
-}
-
-for newname, oldname in comp_dict.items():
-    os.replace(newname, oldname)
+# comp_dict = {
+#     "fangraphs-leaderboards.csv": "fgl_pitchers_10_ip.csv",
+#     "fangraphs-leaderboards (1).csv": "fgl_pitchers_30_ip.csv",
+#     "fangraphs-leaderboards (2).csv": "fgl_hitters_40_pa.csv",
+#     "fangraphs-leaderboards (3).csv": "fgl_hitters_last_14.csv",
+#     "fangraphs-leaderboards (4).csv": "fgl_hitters_last_7.csv",
+#     "fangraphs-leaderboards (5).csv": "fgl_pitchers_last_14.csv",
+#     "fangraphs-leaderboards (6).csv": "fgl_pitchers_last_30.csv",
+#     "fangraphs-leaderboards (7).csv": "hitter.csv",
+#     "fangraphs-leaderboards (8).csv": "pitcher.csv",
+# }
+#
+# for newname, oldname in comp_dict.items():
+#     os.replace(newname, oldname)
 
 excluded = pd.read_csv("excluded.csv")
 
@@ -165,54 +165,70 @@ ipwindow = [10, 30]
 
 df_list = []
 
+# Initialize a list to keep track of printed titles
+printed_titles = []
+
 with open("weeklyadds.csv", "w+") as f:
     for w in hitdaywindow:
         df = hitters_wk_preprocessing(f"fgl_hitters_last_{w}.csv")
         df = df.sort_values(by="Total Z-Score", ascending=False)
         df_list.append(df)
-        if not df.empty:
-            f.write(f"Hitters Last {w} Days\n\n")
-            df.to_csv(f, index=False)
+        title = f"Hitters Last {w} Days"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
             f.write("\n")
+            printed_titles.append(title)
 
     for w in pawindow:
         df = hitters_pa_preprocessing(f"fgl_hitters_{w}_pa.csv")
         df = df.sort_values(by="Total Z-Score", ascending=False)
         df_list.append(df)
-        if not df.empty:
-            f.write(f"Hitters {w} PA\n\n")
-            df.to_csv(f, index=False)
+        title = f"Hitters {w} PA"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
             f.write("\n")
+            printed_titles.append(title)
 
     for w in ipwindow:
         df = sp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
         df = df.sort_values(by="Total Z-Score", ascending=False)
         df_list.append(df)
-        if not df.empty:
-            f.write(f"SP {w} Innings\n\n")
-            df.to_csv(f, index=False)
-            f.write(f"RP {w} Innings\n\n")
-            df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
-            df = df.sort_values(by="Total Z-Score", ascending=False)
-            df_list.append(df)
-            if not df.empty:
-                f.write(f"RP {w} Innings\n\n")
-                df.to_csv(f, index=False)
-                f.write("\n")
+        title = f"SP {w} Innings"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
+            f.write("\n")
+            printed_titles.append(title)
+
+        df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        title = f"RP {w} Innings"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
+            f.write("\n")
+            printed_titles.append(title)
 
     for w in pitchdaywindow:
         df = sp_preprocessing(f"fgl_pitchers_last_{w}.csv")
         df = df.sort_values(by="Total Z-Score", ascending=False)
         df_list.append(df)
-        if not df.empty:
-            f.write(f"Pitchers Last {w} Days\n\n")
-            df.to_csv(f, index=False)
+        title = f"Pitchers Last {w} Days"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
             f.write("\n")
-            df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
-            df = df.sort_values(by="Total Z-Score", ascending=False)
-            df_list.append(df)
-            if not df.empty:
-                f.write(f"RP Last {w} Days\n\n")
-                df.to_csv(f, index=False)
-                f.write("\n")
+            printed_titles.append(title)
 
+        df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        title = f"RP Last {w} Days"
+        if not df.empty and title not in printed_titles:
+            f.write(f"{title}\n")
+            df.round(2).to_csv(f, index=False)
+            f.write("\n")
+            printed_titles.append(title)
