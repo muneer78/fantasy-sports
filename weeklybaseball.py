@@ -21,7 +21,7 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv("excluded.csv")
 
-def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns):
+def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns, zscore_columns):
     df = data_df.copy()
     temp_df = temp_data[['Name', 'PlayerId']]
 
@@ -38,6 +38,7 @@ def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns):
     df = df.merge(temp_df[['Name', 'PlayerId']], on=["Name"], how="left")
 
     return df
+
 
 # Load the data
 dfhitter = pd.read_csv('hitter.csv')
@@ -134,6 +135,7 @@ def sp_preprocessing(filepath):
     ].sort_values(by="Starting", ascending=False)
     return filters1
 
+
 def rp_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["PlayerId"])
 
@@ -153,6 +155,7 @@ def rp_preprocessing(filepath):
         & (df["Pitching"] > 99)
     ].sort_values(by="Relieving", ascending=False)
     return filters2
+
 
 # Preprocess and export the dataframes to Excel workbook sheets
 hitdaywindow = [7, 14]
@@ -212,3 +215,4 @@ with open("weeklyadds.csv", "w+") as f:
                 f.write(f"RP Last {w} Days\n\n")
                 df.to_csv(f, index=False)
                 f.write("\n")
+
