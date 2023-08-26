@@ -21,7 +21,7 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv("excluded.csv")
 
-def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns, zscore_columns):
+def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns):
     df = data_df.copy()
     temp_df = temp_data[['Name', 'PlayerId']]
 
