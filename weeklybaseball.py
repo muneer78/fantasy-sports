@@ -2,7 +2,6 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 import os
 from scipy import stats
-import pandas_log
 
 # define dictionary
 comp_dict = {
@@ -22,46 +21,44 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv("excluded.csv")
 
-with pandas_log.enable():
-    dfhitter = pd.read_csv('hitter.csv')
-    # dfhitter['Barrel%'] = dfhitter['Barrel%'] = dfhitter['Barrel%'].str.rstrip('%').astype('float64')
-    temp_df = dfhitter[['Name', 'PlayerId']]
-    dfhitter = dfhitter.drop(columns = ['PlayerId', 'MLBAMID'])
-    columns = ["PA", "HR", "SB", 'BABIP+', 'K%+', 'BB%+', 'ISO+', 'wRC+', 'Barrels', "Barrel%"]
-    dfhitter = dfhitter.fillna(0)
-    dfhitter[columns] = dfhitter[columns].astype('float')
+def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns, zscore_columns):
+    df = data_df.copy()
+    temp_df = temp_data[['Name', 'PlayerId']]
 
-# Get the list of columns to zscore
-numbers = dfhitter.select_dtypes(include='number').columns
+    df = df.drop(columns=id_columns)
+    df = df.fillna(0)
 
-with pandas_log.enable():
-    # Zscore the columns
-    dfhitter[numbers] = dfhitter[numbers].apply(stats.zscore)
+    df[numeric_columns] = df[numeric_columns].astype('float')
 
-with pandas_log.enable():
-    # Add a column for the total z-score
-    dfhitter['Total Z-Score'] = pd.Series(dtype=float)
-    dfhitter['Total Z-Score'] = dfhitter[numbers].sum(axis=1).round(2)
-    dfhitter = dfhitter.merge(temp_df[['Name', 'PlayerId']], on=["Name"], how="left")
+    numbers = df.select_dtypes(include='number').columns
+    df[numbers] = df[numbers].apply(stats.zscore)
 
+    df['Total Z-Score'] = df[numbers].sum(axis=1).round(2)
+
+    df = df.merge(temp_df[['Name', 'PlayerId']], on=["Name"], how="left")
+
+    return df
+
+# Load the data
+dfhitter = pd.read_csv('hitter.csv')
 dfpitcher = pd.read_csv('pitcher.csv')
-temp_df2 = dfpitcher[['Name', 'PlayerId']]
-dfpitcher = dfpitcher.drop(columns = ['PlayerId', 'MLBAMID'])
-dfpitcher = dfpitcher.fillna(0)
 
-columns2 = ['Stuff+', 'Location+', 'Pitching+', 'Starting', 'Relieving']
-dfpitcher[columns2] = dfpitcher[columns2].astype('float')
+# Define columns for processing hitters and pitchers
+hitter_id_columns = ['PlayerId', 'MLBAMID']
+hitter_numeric_columns = ["PA", "HR", "SB", 'BABIP+', 'K%+', 'BB%+', 'ISO+', 'wRC+', 'Barrels', "Barrel%"]
+hitter_zscore_columns = hitter_numeric_columns + ['Total Z-Score']
 
-# Get the list of columns to zscore
-numbers2 = dfpitcher.select_dtypes(include='number').columns
+pitcher_id_columns = ['PlayerId', 'MLBAMID']
+pitcher_numeric_columns = ['Stuff+', 'Location+', 'Pitching+', 'Starting', 'Relieving']
+pitcher_zscore_columns = pitcher_numeric_columns + ['Total Z-Score']
 
-# Zscore the columns
-dfpitcher[numbers2] = dfpitcher[numbers2].apply(stats.zscore)
+# Process hitter and pitcher data
+dfhitter_processed = process_and_merge_data(dfhitter, dfhitter, hitter_id_columns, hitter_numeric_columns, hitter_zscore_columns)
+dfpitcher_processed = process_and_merge_data(dfpitcher, dfpitcher, pitcher_id_columns, pitcher_numeric_columns, pitcher_zscore_columns)
 
-# Add a column for the total z-score
-dfpitcher['Total Z-Score'] = pd.Series(dtype=float)
-dfpitcher['Total Z-Score'] = dfpitcher[numbers2].sum(axis=1).round(2)
-dfpitcher = dfpitcher.merge(temp_df2[['Name', 'PlayerId']], on=["Name"], how="left")
+# Add Total Z-Score column to the original DataFrames
+dfhitter['Total Z-Score'] = dfhitter_processed['Total Z-Score']
+dfpitcher['Total Z-Score'] = dfpitcher_processed['Total Z-Score']
 
 today = date.today()
 today = datetime.strptime(
@@ -72,7 +69,6 @@ def hitters_wk_preprocessing(filepath):
     '''Creates weekly hitter calcs'''
     df = pd.read_csv(filepath, index_col=["PlayerId"])
 
-    # df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
     filter = df[(df["PA"] > 10)]
 
     df.columns = df.columns.str.replace("[+,-,%,]", "", regex=True)
@@ -96,7 +92,6 @@ def hitters_wk_preprocessing(filepath):
 def hitters_pa_preprocessing(filepath):
     df = pd.read_csv(filepath, index_col=["PlayerId"])
 
-    # df["Barrel%"] = df["Barrel%"] = df["Barrel%"].str.rstrip("%").astype("float")
     filter = df[(df["PA"] > 10)]
 
     df.columns = df.columns.str.replace("[+,-,%,]", "", regex=True)
@@ -130,9 +125,6 @@ def sp_preprocessing(filepath):
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
     df = df.merge(dfpitcher[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
 
-    # df["Barrel"] = df["Barrel"] = df["Barrel"].str.rstrip("%").astype("float")
-    # df["CSW"] = df["CSW"] = df["CSW"].str.rstrip("%").astype("float")
-
     filters1 = df[
         (df["Barrel"] < 7)
         & (df["Starting"] > 5)
@@ -154,9 +146,6 @@ def rp_preprocessing(filepath):
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
     df = df.merge(dfpitcher[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
 
-    # df["Barrel"] = df["Barrel"] = df["Barrel"].str.rstrip("%").astype("float")
-    # df["CSW"] = df["CSW"] = df["CSW"].str.rstrip("%").astype("float")
-
     filters2 = df[
         (df["Barrel"] < 7)
         & (df["Total Z-Score"] > 8)
@@ -165,62 +154,61 @@ def rp_preprocessing(filepath):
     ].sort_values(by="Relieving", ascending=False)
     return filters2
 
-with pandas_log.enable():
-    # Preprocess and export the dataframes to Excel workbook sheets
-    hitdaywindow = [7, 14]
-    pawindow = [40]
-    pitchdaywindow = [14, 30]
-    ipwindow = [10, 30]
+# Preprocess and export the dataframes to Excel workbook sheets
+hitdaywindow = [7, 14]
+pawindow = [40]
+pitchdaywindow = [14, 30]
+ipwindow = [10, 30]
 
-    df_list = []
+df_list = []
 
-    with open("weeklyadds.csv", "w+") as f:
-        for w in hitdaywindow:
-            df = hitters_wk_preprocessing(f"fgl_hitters_last_{w}.csv")
+with open("weeklyadds.csv", "w+") as f:
+    for w in hitdaywindow:
+        df = hitters_wk_preprocessing(f"fgl_hitters_last_{w}.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        if not df.empty:
+            f.write(f"Hitters Last {w} Days\n\n")
+            df.to_csv(f, index=False)
+            f.write("\n")
+
+    for w in pawindow:
+        df = hitters_pa_preprocessing(f"fgl_hitters_{w}_pa.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        if not df.empty:
+            f.write(f"Hitters {w} PA\n\n")
+            df.to_csv(f, index=False)
+            f.write("\n")
+
+    for w in ipwindow:
+        df = sp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        if not df.empty:
+            f.write(f"SP {w} Innings\n\n")
+            df.to_csv(f, index=False)
+            f.write(f"RP {w} Innings\n\n")
+            df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
             df = df.sort_values(by="Total Z-Score", ascending=False)
             df_list.append(df)
             if not df.empty:
-                f.write(f"Hitters Last {w} Days\n\n")
-                df.to_csv(f, index=False)
-                f.write("\n")
-
-        for w in pawindow:
-            df = hitters_pa_preprocessing(f"fgl_hitters_{w}_pa.csv")
-            df = df.sort_values(by="Total Z-Score", ascending=False)
-            df_list.append(df)
-            if not df.empty:
-                f.write(f"Hitters {w} PA\n\n")
-                df.to_csv(f, index=False)
-                f.write("\n")
-
-        for w in ipwindow:
-            df = sp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
-            df = df.sort_values(by="Total Z-Score", ascending=False)
-            df_list.append(df)
-            if not df.empty:
-                f.write(f"SP {w} Innings\n\n")
-                df.to_csv(f, index=False)
                 f.write(f"RP {w} Innings\n\n")
-                df = rp_preprocessing(f"fgl_pitchers_{w}_ip.csv")
-                df = df.sort_values(by="Total Z-Score", ascending=False)
-                df_list.append(df)
-                if not df.empty:
-                    f.write(f"RP {w} Innings\n\n")
-                    df.to_csv(f, index=False)
-                    f.write("\n")
+                df.to_csv(f, index=False)
+                f.write("\n")
 
-        for w in pitchdaywindow:
-            df = sp_preprocessing(f"fgl_pitchers_last_{w}.csv")
+    for w in pitchdaywindow:
+        df = sp_preprocessing(f"fgl_pitchers_last_{w}.csv")
+        df = df.sort_values(by="Total Z-Score", ascending=False)
+        df_list.append(df)
+        if not df.empty:
+            f.write(f"Pitchers Last {w} Days\n\n")
+            df.to_csv(f, index=False)
+            f.write("\n")
+            df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
             df = df.sort_values(by="Total Z-Score", ascending=False)
             df_list.append(df)
             if not df.empty:
-                f.write(f"Pitchers Last {w} Days\n\n")
+                f.write(f"RP Last {w} Days\n\n")
                 df.to_csv(f, index=False)
                 f.write("\n")
-                df = rp_preprocessing(f"fgl_pitchers_last_{w}.csv")
-                df = df.sort_values(by="Total Z-Score", ascending=False)
-                df_list.append(df)
-                if not df.empty:
-                    f.write(f"RP Last {w} Days\n\n")
-                    df.to_csv(f, index=False)
-                    f.write("\n")
