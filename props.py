@@ -23,7 +23,7 @@ with pandas_log.enable():
     ic(dfprops)
 
     # Filter rows where GS > 1
-    dfprops = dfprops.loc[(dfprops['GS'] > 1) & (dfprops['IP/G'] > 5)]
+    dfprops = dfprops.loc[(dfprops['GS'] > 1) & (dfprops['IP/G'] >= 5) & (dfprops['IP/G'] < 8) & (dfprops['K/GS'] <= 9) & (dfprops['BB/GS'] <= 6)]
 
     dfsched.rename(columns={dfsched.columns[2]: "Name"}, inplace=True)
     dfsched = dfsched.fillna(0)
@@ -120,7 +120,7 @@ with pandas_log.enable():
     dfprops2['IP/G'] = dfprops2['IP/G'].round(0)
 
     # Filter rows where GS > 1
-    dfprops2 = dfprops2.loc[(dfprops2['GS'] > 1) & (dfprops2['IP/G'] > 5)]
+    dfprops2 = dfprops2.loc[(dfprops2['GS'] > 1) & (dfprops2['IP/G'] >= 5) & (dfprops2['IP/G'] < 8) & (dfprops2['K/GS'] <= 9) & (dfprops2['BB/GS'] <= 6)]
 
     dfsched2.rename(columns={dfsched2.columns[1]: "Name"}, inplace=True)
     dfsched2 = dfsched2.fillna(0)
