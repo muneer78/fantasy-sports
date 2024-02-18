@@ -1,3 +1,19 @@
+'''
+1. Make sure excluded.csv is in same folder as script
+	- Need to update this file at the beginning of each season
+2. Download the following reports from Fangraphs
+	- 10 IP Pitchers
+	- 30 IP Pitchers
+	- 40 PA Hitters
+	- Hitters Last 14 Days
+	- Hitters Last 7 Days
+	- Pitchers Last 14 Days
+	- Pitchers Last 30 Days
+	- ZScoreHitter
+	- ZScorePitcher
+3. Download chart for average game score: https://www.baseball-reference.com/leagues/majors/2023-starter-pitching.shtml
+'''
+
 import pandas as pd
 from datetime import date, datetime
 import os

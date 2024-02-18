@@ -1,8 +1,12 @@
+'''
+1. Go to Average Draft Position on FantasyPros and export files as csv. Update references in script.
+'''
+
 import pandas as pd
 
-dffghit = pd.read_csv('fg.csv')
-dffgpit = pd.read_csv('fg2.csv')
-dfadp = pd.read_csv('adp.csv')
+dffghit = pd.read_csv('pitcher.csv')
+dffgpit = pd.read_csv('hitter.csv')
+dfadp = pd.read_csv('FantasyPros_2024_Overall_MLB_ADP_Rankings.csv')
 
 dflist = [dffgpit, dffghit, dfadp]
 for index in range(len(dflist)):
@@ -17,14 +21,14 @@ dffgpit['Key'] = dffgpit.Name.apply(func)
 dfadp['Key'] = dfadp.Player.apply(func)
 dffghit['Key'] = dffghit.Name.apply(func)
 
-dfadp = dfadp.drop(['ESPN','CBS','RTS','NFBC','FT'], axis=1)
+dfadp = dfadp.drop(['ESPN','CBS','RTS','NFBC'], axis=1)
 
-df1 = dfadp.merge(dffgpit[['Key', 'playerid']], on=["Key"], how="left").merge(dffghit[['Key', 'playerid']], on=["Key"], how="left")
+df1 = dfadp.merge(dffgpit[['Key', 'PlayerId']], on=["Key"], how="left").merge(dffghit[['Key', 'PlayerId']], on=["Key"], how="left")
 df1 = df1.fillna(value=0)
-df1['playerid'] = df1['playerid_x'].mask(df1['playerid_x'].eq(0), df1['playerid_y'])
-df1['playerid'] = df1['playerid'].astype(int)
+df1['PlayerId'] = df1['PlayerId_x'].mask(df1['PlayerId_x'].eq(0), df1['PlayerId_y'])
+df1['PlayerId'] = df1['PlayerId'].astype(int)
 
-df1 = df1[['playerid','Player']]
-result = df1[:75]
+df1 = df1[['PlayerId','Player']]
+result = df1[:100]
 
 result.to_csv('excluded.csv', index=False)
