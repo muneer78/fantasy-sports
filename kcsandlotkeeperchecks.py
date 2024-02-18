@@ -41,3 +41,9 @@ df_messages = pd.DataFrame({'Message': messages})
 
 # Print dataframe
 print(df_messages)
+
+# Create pivot table
+pivot_table = pd.pivot_table(df_kcsandlotkeepers, values=['Name'], index=['Group'], aggfunc='count')
+
+# Print the pivot table to the terminal
+print(pivot_table)
