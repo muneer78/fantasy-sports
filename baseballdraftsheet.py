@@ -1,3 +1,13 @@
+'''
+Steps to get create the CSVs
+1. Update Preseason Hitter Report on Fangraphs
+2. Download as hitter.csv
+3. Update Preseason Pitcher Report on Fangraphs
+4. Downlaod as hitter.csv
+5. Go to Draft Rankings on Fantasy Pros. Download rankings file as csv. Update name of reference in script.
+6. Request csv file from John Laghezza
+'''
+
 import pandas as pd
 from scipy import stats
 import numpy as np
