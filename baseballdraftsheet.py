@@ -1,10 +1,18 @@
 import pandas as pd
 from scipy import stats
 import numpy as np
+from unidecode import unidecode
 
 # Function to create keys from player names
 def create_key(player_name):
     return "".join([i[:3] for i in player_name.strip().split(" ")])
+
+# Function to remove accents
+def remove_accents(text):
+    if isinstance(text, str):  # Check if the value is a string
+        return unidecode(text)
+    else:
+        return text  # Retu
 
 # Read the preseason pitchers data
 df_pitchers = pd.read_csv("pitcher.csv", index_col=["PlayerId"])
@@ -74,20 +82,22 @@ rounded_df_hitters.to_csv("ZHitters.csv")
 df_adp = pd.read_csv("FantasyPros_Fantasy_Baseball_Rankings_ALL.csv")
 df_zpit = pd.read_csv("ZPitchers.csv")
 df_zhit = pd.read_csv("ZHitters.csv")
-df_laghezza = pd.read_csv("TOP 625 3.9 UPDATE.csv")
+df_laghezza = pd.read_csv("laghezza.csv")
 
 df_adp = df_adp.rename(columns={"Player": "Name"})
 
-# Clean player names in all dataframes
-dataframes_to_clean = [df_adp, df_zpit, df_zhit, df_laghezza]
+dataframes_to_clean = [df_adp, df_zpit, df_zhit, df_laghezza]  # List of DataFrames to clean
 for df in dataframes_to_clean:
-    df["Name"] = df["Name"].str.replace(r"[^\w\s]|_\*", "").str.replace(" Jr", "").str.replace(" II", "")
+    df['Name'] = df['Name'].apply(remove_accents)  # Remove accents
+    df['Name'] = df['Name'].str.replace(r"[^\w\s]|_\*", "")  # Remove special characters
+    df['Name'] = df['Name'].str.replace(" Jr", "")  # Remove "Jr"
+    df['Name'] = df['Name'].str.replace(" II", "")  # Remove "II"
 
 # Convert df_adp to string
 df_adp = df_adp.astype(str)
 
 # Rename the "Rank" column to "ADP"
-df_laghezza = df_laghezza.rename(columns={"PosRank": "LRank"})
+df_laghezza = df_laghezza.rename(columns={"Rank": "LRank"})
 
 # Apply the create_key function to add the "Key" column
 df_adp["Key"] = df_adp["Name"].apply(create_key)
@@ -124,7 +134,7 @@ df1.loc[df1.LRank.isnull(), "LRank"] = df1["Rank"]
 df1["RankDiff"] = df1["Rank"] - df1["LRank"].mask(df1["LRank"].eq(0), df1["Rank"])
 
 # Select and rename columns
-columns = ["Name", "Team", "Total Z-Score", "RankDiff", "ADP"]
+columns = ["Name", "Team", "Total Z-Score", "RankDiff", "LRank", "ADP"]
 df1 = df1[columns]
 
 # Sort the "ADP" column
