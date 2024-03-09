@@ -1,7 +1,4 @@
 import pandas as pd
-from scipy import stats
-import numpy as np
-from unidecode import unidecode
 
 # Function to create keys from player names
 def create_key(player_name):
@@ -47,8 +44,8 @@ df1[cols] = df1[cols].apply(pd.to_numeric, errors="coerce", axis=1)
 columns = ["Group", "Name", "Team", "Position", "Service Time", "Total Z-Score", "LRank", "ADP"]
 df1 = df1[columns]
 
-# Sort the "ADP" column
-df1.sort_values(by="Total Z-Score", ascending = False, inplace=True)
+# Sort the "ZScore" column
+df1.sort_values(by=["Group", "LRank", "Total Z-Score"], ascending = [True, True, False], inplace=True)
 
 # Save the dataframe to CSV
 df1.to_csv("sandlot.csv", index=False)
