@@ -11,7 +11,8 @@
 	- Pitchers Last 30 Days
 	- ZScoreHitter
 	- ZScorePitcher
-3. Download chart for average game score: https://www.baseball-reference.com/leagues/majors/2023-starter-pitching.shtml
+3. Download chart for average game score: https://www.baseball-reference.com/leagues/majors/2024-starter-pitching.shtml
+4. Download the player map from Smart Fantasy Baseball to map between the BBRef and Fangraphs IDs: https://www.smartfantasybaseball.com/tools/
 '''
 
 import pandas as pd
@@ -36,6 +37,8 @@ for newname, oldname in comp_dict.items():
     os.replace(newname, oldname)
 
 excluded = pd.read_csv("excluded.csv")
+player_map = pd.read_csv("SFBB-Player-ID-Map - PLAYERIDMAP.csv")
+df_gmsc = pd.read_csv("gmsca.csv")
 
 def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns, zscore_columns):
     df = data_df.copy()
@@ -79,7 +82,7 @@ dfpitcher['Total Z-Score'] = dfpitcher_processed['Total Z-Score']
 
 today = date.today()
 today = datetime.strptime(
-    "2023-10-31", "%Y-%m-%d"
+    "2024-10-31", "%Y-%m-%d"
 ).date()  # pinning to last day of baseball season
 
 def hitters_wk_preprocessing(filepath):
@@ -95,14 +98,24 @@ def hitters_wk_preprocessing(filepath):
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
     df = df.merge(dfhitter[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
 
+    # filters after 5/1
     filters = df[
         (df["wRC"] > 135)
         & (df["OPS"] > 0.8)
         & (df["K"] < 100)
         & (df["BB"] > 100)
-        & (df["Off"] > 3)
-        & (df["Barrel"] > 10)
+        & (df["Off"] > 1)
     ].sort_values(by="Off", ascending=False)
+
+    # filters after 5/1
+    # filters = df[
+    #     (df["wRC"] > 135)
+    #     & (df["OPS"] > 0.8)
+    #     & (df["K"] < 100)
+    #     & (df["BB"] > 100)
+    #     & (df["Off"] > 3)
+    #     & (df["Barrel"] > 10)
+    # ].sort_values(by="Off", ascending=False)
     return filters
 
 
@@ -118,15 +131,27 @@ def hitters_pa_preprocessing(filepath):
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
     df = df.merge(dfhitter[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
 
+    # filters before 5/1
     filters = df[
         (df["wRC"] > 115)
         & (df["OPS"] > 0.8)
         & (df["K"] < 110)
         & (df["BB"] > 90)
-        & (df["Off"] > 5)
-        & (df["Barrel"] > 10)
-        & (df["PA"] > 40)
+        & (df["Off"] > 1)
+        & (df["Barrel"] > 1)
+        & (df["PA"] > 5)
     ].sort_values(by="Off", ascending=False)
+
+    # filters after 5/1
+    # filters = df[
+    #     (df["wRC"] > 115)
+    #     & (df["OPS"] > 0.8)
+    #     & (df["K"] < 110)
+    #     & (df["BB"] > 90)
+    #     & (df["Off"] > 5)
+    #     & (df["Barrel"] > 10)
+    #     & (df["PA"] > 40)
+    # ].sort_values(by="Off", ascending=False)
     return filters
 
 
@@ -140,15 +165,38 @@ def sp_preprocessing(filepath):
     df.fillna(0)
     df.reset_index(inplace=True)
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
-    df = df.merge(dfpitcher[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
+    # df = df.merge(dfpitcher[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left"
+    #     .merge(player_map[["IDFANGRAPHS", "BREFID"]]), on=["PlayerId"], how="left")
 
+    # Merge player_map with df using "IDFANGRAPHS" and "PlayerId"
+    df = df.merge(player_map[['IDFANGRAPHS', 'BREFID']], left_on='PlayerId', right_on='IDFANGRAPHS', how='left')
+
+    # Add "BREFID" column from player_map to df
+    df['BREFID'] = player_map['BREFID']
+
+    # Merge df with df_gmsc using "BREFID" as key
+    df = df.merge(df_gmsc, left_on='BREFID', right_on='Name-additional', how='left')
+
+    # Add "BREFID" column from player_map to df
+    df['AvgGameScore'] = df_gmsc['GmScA']
+
+    # filters before 5/1
     filters1 = df[
-        (df["Barrel"] < 7)
-        & (df["Starting"] > 5)
-        & (df["GS"] > 1)
-        & (df["Pitching"] > 99)
-        & (df["Total Z-Score"] > 8)
+        (df["Starting"] > 0.5)
+        # & (df["GS"] > 1)
+        # & (df["Pitching"] > 99)
+        # & (df["Total Z-Score"] > 8)
     ].sort_values(by="Starting", ascending=False)
+    return filters1
+
+    # filters after 5/1
+    # filters1 = df[
+    #     (df["Barrel"] < 7)
+    #     & (df["Starting"] > 5)
+    #     & (df["GS"] > 1)
+    #     & (df["Pitching"] > 99)
+    #     & (df["Total Z-Score"] > 8)
+    # ].sort_values(by="Starting", ascending=False)
     return filters1
 
 
@@ -164,13 +212,21 @@ def rp_preprocessing(filepath):
     df = df[~df["PlayerId"].isin(excluded["PlayerId"])]
     df = df.merge(dfpitcher[["PlayerId", "Total Z-Score"]], on=["PlayerId"], how="left")
 
+    # filters before 5/1
     filters2 = df[
-        (df["Barrel"] < 7)
-        & (df["Total Z-Score"] > 8)
+        (df["Total Z-Score"] > 8)
         & (df["Relieving"] > 0)
         & (df["Pitching"] > 99)
     ].sort_values(by="Relieving", ascending=False)
-    return filters2
+
+    # filters after 5/1
+    # filters2 = df[
+    #     (df["Barrel"] < 7)
+    #     & (df["Total Z-Score"] > 8)
+    #     & (df["Relieving"] > 0)
+    #     & (df["Pitching"] > 99)
+    # ].sort_values(by="Relieving", ascending=False)
+    # return filters2
 
 
 # Preprocess and export the dataframes to Excel workbook sheets
