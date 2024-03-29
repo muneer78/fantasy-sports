@@ -3,7 +3,7 @@ import random
 import time
 import os
 
-
+# Define teams for each region with their corresponding winning probabilities
 south_teams_list = [
     (1, 'Houston', 0.796178344),
     (2, 'Marquette', 0.706586826),
@@ -92,6 +92,31 @@ for region, teams_list in zip(['South', 'West', 'East', 'Midwest'], [south_teams
     for seed, _, prob in teams_list:
         seeds[(region, seed)] = prob
 
+# Define the seed to region mapping
+seed_to_region = {}
+for region, teams_list in zip(['South', 'West', 'East', 'Midwest'], [south_teams_list, west_teams_list, east_teams_list, midwest_teams_list]):
+    for seed, _, _ in teams_list:
+        seed_to_region[seed] = region
+
+# Define the matchups for each round
+matchups_round_2 = [
+    ('1-16', '8-9'),
+    ('5-12', '4-13'),
+    ('6-11', '3-14'),
+    ('7-10', '2-15')
+]
+
+matchups_round_3 = [
+    (None, None),  # Placeholder for winners of round 2 matchups
+    (None, None)
+]
+
+matchups_round_4 = (None, None)  # Placeholder for winners of round 3 matchups
+
+# Define the matchups for the final round
+final_matchups = (None, None)
+
+# Function to generate a random number between 0 and 1
 def generate_random_number():
     # Combine system-provided randomness with random module
     random.seed(time.time() + os.getpid())
@@ -101,6 +126,7 @@ def generate_random_number():
     formatted_random_number = "{:.9f}".format(random_number)
     return formatted_random_number
 
+# Function to get team name based on seed and region
 def get_team_name(seed, region):
     if region == "West":
         return west_teams_list[seed-1][1]
@@ -112,83 +138,86 @@ def get_team_name(seed, region):
         return south_teams_list[seed-1][1]
 
 def simulate_matchup(team1_seed, team2_seed, key_value_pairs):
+    # Check if any seed is None
+    if team1_seed is None:
+        return team2_seed
+    elif team2_seed is None:
+        return team1_seed
+
     # Determine the higher and lower seeds
     higher_seed = max(team1_seed, team2_seed)
     lower_seed = min(team1_seed, team2_seed)
     
     # Retrieve the cutoff probability for the lower seed
-    cutoff_prob = key_value_pairs[(region, lower_seed)]
+    cutoff_prob = key_value_pairs[(seed_to_region[team1_seed], lower_seed)]
     # Generate a random number
     random_number = generate_random_number()
     
-    # Invert the probability
-    inverted_prob = 1 - cutoff_prob
-    
-    # Compare the random number with the inverted probability
-    if float(random_number) > inverted_prob:
+    # Compare the random number with the cutoff probability
+    if float(random_number) < cutoff_prob:  # Corrected the comparison here
         return lower_seed
     else:
         return higher_seed
 
-def region_winner(region_name):
-    # Define the initial matchups for the first round
-    matchups = ['1-16', '8-9', '5-12', '4-13', '6-11', '3-14', '7-10', '2-15']
-
-    # Iterate through each round of matchups until there's only one matchup left
-    while len(matchups) > 1:
-        next_round_winners = []
-        for i in range(0, len(matchups), 2):  # Iterate through matchups pairwise
-            team1_seed, team2_seed = map(int, matchups[i].split('-'))
-            winner1_seed = simulate_matchup(team1_seed, team2_seed, seeds)
-            
-            team1_seed, team2_seed = map(int, matchups[i+1].split('-'))
-            winner2_seed = simulate_matchup(team1_seed, team2_seed, seeds)
-            
-            # Create a new matchup key based on the winners of the previous matchups
-            new_matchup = f"{winner1_seed}-{winner2_seed}"
-            next_round_winners.append(new_matchup)
-        matchups = next_round_winners
-
-    # Calculate the winner of the final matchup
-    final_winner_seed = int(matchups[0].split('-')[0])
-    return final_winner_seed
-
-# Function to run multiple simulations and count the results
 def run_simulations(num_simulations):
     results = {'Midwest': {i: 0 for i in range(1, 17)},
                'South': {i: 0 for i in range(1, 17)},
                'East': {i: 0 for i in range(1, 17)},
-               'West': {i: 0 for i in range(1, 17)},
-               'Winner_1': {get_team_name(i, "Winner_1"): 0 for i in range(1, 17)},
-               'Winner_2': {get_team_name(i, "Winner_2"): 0 for i in range(1, 17)},
-               'Final_Winner': {get_team_name(i, "Final_Winner"): 0 for i in range(1, 17)}}
+               'West': {i: 0 for i in range(1, 17)}}
+
+    final_winner = {'region': None, 'seed': None}
 
     for _ in range(num_simulations):
-        # Run the tournament
-        midwest = region_winner("Midwest")
-        south = region_winner("South")
-        east = region_winner("East")
-        west = region_winner("West")
+        # Run round 2 matchups
+        round_2_winners = []
+        print("Round 2 winners:")
+        for matchup in matchups_round_2:
+            team1_seed, team2_seed = map(int, matchup[0].split('-'))
+            winner1_seed = simulate_matchup(team1_seed, team2_seed, seeds)
+            
+            team1_seed, team2_seed = map(int, matchup[1].split('-'))
+            winner2_seed = simulate_matchup(team1_seed, team2_seed, seeds)
+            
+            print(f"Matchup 1: {get_team_name(winner1_seed, seed_to_region[team1_seed])} vs. {get_team_name(winner2_seed, seed_to_region[team2_seed])}")
+            round_2_winners.append((winner1_seed, winner2_seed))
 
-        winner_1_seed = simulate_matchup(midwest, south, seeds)
-        winner_2_seed = simulate_matchup(east, west, seeds)
+        # Run round 3 matchups
+        round_3_winners = []
+        print("Round 3 winners:")
+        for i, matchup in enumerate(matchups_round_3):
+            if None in matchup:
+                team1_seed, team2_seed = round_2_winners[i]
+                winner1_seed = simulate_matchup(team1_seed, team2_seed, seeds)
+                
+                team1_seed, team2_seed = round_2_winners[i + 1]
+                winner2_seed = simulate_matchup(team1_seed, team2_seed, seeds)
+                
+                print(f"Matchup {i + 1}: {get_team_name(winner1_seed, seed_to_region[team1_seed])} vs. {get_team_name(winner2_seed, seed_to_region[team2_seed])}")
+                round_3_winners.append((winner1_seed, winner2_seed))
+            else:
+                round_3_winners.append(matchup)
 
-        # Determine the winner between the winners of Region 2, Region 3, and Midwest (Region 1)
-        final_winner_seed = simulate_matchup(winner_1_seed, winner_2_seed, seeds)
+        # Run round 4 matchups
+        winner_1_seed, winner_2_seed = matchups_round_4
+        if winner_1_seed is not None and winner_2_seed is not None:
+            final_winner_seed = simulate_matchup(winner_1_seed, winner_2_seed, seeds)
+            print("Round 4 winner:")
+            print(f"{get_team_name(final_winner_seed, seed_to_region[winner_1_seed])} vs. {get_team_name(final_winner_seed, seed_to_region[winner_2_seed])}")
 
-        # Increment the count for the final winner
-        results['Midwest'][midwest] += 1
-        results['South'][south] += 1
-        results['East'][east] += 1
-        results['West'][west] += 1
-        results['Winner_1'][get_team_name(winner_1_seed, "Winner_1")] += 1
-        results['Winner_2'][get_team_name(winner_2_seed, "Winner_2")] += 1
-        results['Final_Winner'][get_team_name(final_winner_seed, "Final_Winner")] += 1
+            # Determine the region and seed of the winner
+            if final_winner_seed is not None:
+                final_winner_region = seed_to_region[final_winner_seed]
+                final_winner['region'] = final_winner_region
+                final_winner['seed'] = final_winner_seed
 
-    return results
+            # Increment the count for the region winner and final winner
+            if final_winner_seed is not None:
+                results[final_winner['region']][final_winner['seed']] += 1
+
+    return results, final_winner
 
 # Run 100 simulations
-simulations_results = run_simulations(100)
+simulations_results, final_winner = run_simulations(100)
 
 # Print the results
 for region, seeds in simulations_results.items():
@@ -197,3 +226,5 @@ for region, seeds in simulations_results.items():
         team_name = get_team_name(seed, region)
         print(f"{team_name}: {count} times")
     print()
+
+print(f"Final Winner is from {final_winner['region']}: {get_team_name(final_winner['seed'], final_winner['region'])}")
