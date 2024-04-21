@@ -47,3 +47,27 @@ yearly_stats['GAMES'] = lebron_data.groupby('YEAR')['Game_ID'].count().values
 all_seasons_logs_df['FG3M_CUMSUM'] = all_seasons_logs_df.groupby('YEAR')['FG3M'].cumsum()
 all_seasons_logs_df['FGM_CUMSUM'] = all_seasons_logs_df.groupby('YEAR')['FGM'].cumsum()
 
+-------------------
+
+from nba_api.stats.endpoints import leaguedashplayerclutch
+import pandas as pd
+
+# Function to fetch clutch stats for a given season and add a season column
+def fetch_clutch_stats(season):
+    clutch_stats = leaguedashplayerclutch.LeagueDashPlayerClutch(season=season)
+    clutch_stats_df = clutch_stats.get_data_frames()[0]
+    clutch_stats_df['SEASON'] = season  # Adding a season column
+    return clutch_stats_df
+
+# List of seasons to analyze
+seasons = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23','2023-24']
+
+# Concatenating data for all seasons into a single DataFrame
+all_seasons_clutch_stats = pd.concat([fetch_clutch_stats(season) for season in seasons])
+
+# Adding a column to flag the current season vs previous seasons
+current_season = '2023-24'
+all_seasons_clutch_stats['SEASON_TYPE'] = all_seasons_clutch_stats['SEASON'].apply(lambda x: 'Current Season' if x == current_season else 'Previous 5 Seasons')
+
+# Displaying the first few rows of the combined DataFrame
+print(all_seasons_clutch_stats[['SEASON', 'SEASON_TYPE', 'PLAYER_NAME', 'FG_PCT', 'FG3_PCT', 'FT_PCT', 'AST', 'PTS', 'REB', 'TOV', 'STL', 'BLK', 'PF']].head())
