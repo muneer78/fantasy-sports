@@ -99,8 +99,8 @@ df_adp = df_adp.rename(columns={"Player": "Name"})
 dataframes_to_clean = [df_adp, df_zpit, df_zhit, df_laghezza]  # List of DataFrames to clean
 for df in dataframes_to_clean:
     df['Name'] = df['Name'].apply(remove_accents)  # Remove accents
-    df['Name'] = df['Name'].str.replace(r"[^\w\s]|_\*", "")  # Remove special characters
-    df['Name'] = df['Name'].str.replace(" Jr", "")  # Remove "Jr"
+    df['Name'] = df['Name'].str.replace(r"[^\w\s]|_\*|\.|,", "")  # Remove special characters, '.', and ','
+    df['Name'] = df['Name'].str.replace(" Jr.", "")  # Remove "Jr"
     df['Name'] = df['Name'].str.replace(" II", "")  # Remove "II"
 
 # Convert df_adp to string
