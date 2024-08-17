@@ -1,0 +1,11 @@
+numpy
+pandas
+pandas-log
+scipy
+openpyxl
+black[d]
+icecream
+skimpy
+python-sbr
+requests_toolbelt
+unidecode

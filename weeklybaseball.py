@@ -101,7 +101,7 @@ def hitters_wk_preprocessing(filepath):
         & (df["K"] < 100)
         & (df["BB"] > 100)
         & (df["Off"] > 3)
-        & (df["Barrel"] > 10)
+        # & (df["Barrel"] > 10)
     ].sort_values(by="Off", ascending=False)
     return filters
 
@@ -124,7 +124,7 @@ def hitters_pa_preprocessing(filepath):
         & (df["K"] < 110)
         & (df["BB"] > 90)
         & (df["Off"] > 5)
-        & (df["Barrel"] > 10)
+        # & (df["Barrel"] > 10)
         & (df["PA"] > 40)
     ].sort_values(by="Off", ascending=False)
     return filters
@@ -248,3 +248,4 @@ with open("weeklyadds.csv", "w+") as f:
             df.round(2).to_csv(f, index=False)
             f.write("\n")
             printed_titles.append(title)
+print('All done')
