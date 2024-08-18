@@ -1,33 +1,33 @@
-Team,Win totals,Win total rk,Super Bowl odds,Super Bowl Rk,Opp Win %,Win % Rk,DKRank
-Atlanta Falcons,131.5,32,21.47,31,0.417,32,1
-New Orleans Saints,132.5,31,23,32,0.427,31,2
-San Francisco 49ers,140.5,28,17.06,24,0.514,15,3
-Chicago Bears,140.5,28,16.94,22,0.497,18,4
-Carolina Panthers,140.5,28,19.65,29,0.453,27,5
-Houston Texans,142.5,26,19.35,27,0.431,30,6
-Indianapolis Colts,142.5,26,20.35,30,0.434,29,7
-Detroit Lions,143.5,25,16.82,21,0.495,20,8
-Philadelphia Eagles,144.5,24,14.71,13,0.566,1,9
-Seattle Seahawks,145.5,21,16.12,17,0.517,12,10
-Jacksonville Jaguars,145.5,21,19.47,28,0.477,23,11
-Tennessee Titans,145.5,21,19.06,26,0.448,28,12
-New York Giants,146.5,17,13.35,8,0.549,3,13
-Dallas Cowboys,146.5,17,14.41,12,0.549,3,14
-Los Angeles Rams,146.5,17,15.29,15,0.533,9,15
-Pittsburgh Steelers,146.5,17,16.94,22,0.47,25,16
-Green Bay Packers,147.5,14,15.94,16,0.476,24,17
-Cleveland Browns,147.5,14,16.41,18,0.46,26,18
-Tampa Bay Buccaneers,147.5,14,18.53,25,0.483,22,19
-Cincinnati Bengals,148.5,13,16.59,20,0.51,17,20
-Denver Broncos,149.5,12,13.82,10,0.517,12,21
-Washington Commanders,150.5,10,12.88,6,0.535,8,22
-Baltimore Ravens,150.5,10,16.41,18,0.484,21,23
-New York Jets,151.5,6,13.41,9,0.545,6,24
-Los Angeles Chargers,151.5,6,12.18,5,0.517,12,25
-Arizona Cardinals,151.5,6,15.12,14,0.519,11,26
-Minnesota Vikings,151.5,6,14.24,11,0.497,18,27
-Las Vegas Raiders,152.5,5,13.06,7,0.524,10,28
-Buffalo Bills,153.5,3,12,4,0.542,7,29
-Kansas City Chiefs,153.5,3,11.94,3,0.512,16,30
-Miami Dolphins,155.5,1,11.06,1,0.554,2,31
-New England Patriots,155.5,1,11.06,1,0.549,3,32
+Team,DKRank,,,
+Atlanta Falcons,1,,,
+Los Angeles Chargers,2,,,
+Chicago Bears,3,,,
+New York Jets,4,,,
+New Orleans Saints,5,,,
+Cincinnati Bengals,6,,,
+Indianapolis Colts,7,,,
+Miami Dolphins,8,,,
+Philadelphia Eagles,9,,,
+Carolina Panthers,10,,,
+Tampa Bay Buccaneers,11,,,
+Kansas City Chiefs,12,,,
+Washington Commanders,13,,,
+Jacksonville Jaguars,14,,,
+Seattle Seahawks,15,,,
+Arizona Cardinals,16,,,
+Los Angeles Rams,17,,,
+San Francisco 49ers,18,,,
+Green Bay Packers,19,,,
+New York Giants,20,,,
+Detroit Lions,21,,,
+Dallas Cowboys,22,,,
+Buffalo Bills,23,,,
+Las Vegas Raiders,24,,,
+Denver Broncos,25,,,
+Houston Texans,26,,,
+Tennessee Titans,27,,,
+Minnesota Vikings,28,,,
+Baltimore Ravens,29,,,
+Cleveland Browns,30,,,
+New England Patriots,31,,,
+Pittsburgh Steelers,32,,,
