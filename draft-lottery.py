@@ -3,15 +3,15 @@ import random
 # Assigning numbers to each team based on their percentages in reverse order
 team_assignments = {
     "Britt": list(range(190, 250)),
-    "Mike": list(range(150, 190)),
-    "Nick": list(range(120, 150)),
-    "Jack": list(range(90, 120)),
-    "Carl": list(range(60, 90)),
-    "Brian": list(range(40, 60)),
-    "Muneer": list(range(20, 40)),
-    "Scott": list(range(10, 20)),
-    "Steve": list(range(5, 10)),
-    "Tony": list(range(1, 5))
+    "Jack": list(range(150, 190)),
+    "Carl": list(range(120, 150)),
+    "Nick": list(range(90, 120)),
+    "Muneer": list(range(60, 90)),
+    "Mike": list(range(40, 60)),
+    "Tony": list(range(20, 40)),
+    "Steve": list(range(10, 20)),
+    "Scott": list(range(5, 10)),
+    "Brian": list(range(1, 5))
 }
 
 # Initialize an empty list to store the draft order
