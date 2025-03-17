@@ -4,7 +4,7 @@ import math
 
 # write round of 64 bracket to list
 next_round_teams = []
-with open('bracket2024.csv', mode ='r')as file:
+with open(r'/Users/muneer78/Documents/Projects/fantasy-sports/bracket2025.csv', mode ='r')as file:
     csv_file = csv.reader(file)
     for line in csv_file:
         next_round_teams.append(line)
@@ -48,7 +48,7 @@ with open("results.txt", "w") as f:
                 next_round_teams.append(teams[i])
             
             # print results
-            print(f'since {r1} {'>' if r1 > 50+correction else '<'} {(50+correction):.4f}'+
+            print(f'since {r1} '>' if r1 > 50+{correction} else '<' 50+{correction}:.4f}'+
                   f' #{next_round_teams[-1][1]} {next_round_teams[-1][0]} wins\n', file=f)
         
         # add a few line break between rounds

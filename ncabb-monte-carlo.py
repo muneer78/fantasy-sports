@@ -23,7 +23,7 @@ def simulate_round(teams):
 
 # write round of 64 bracket to list
 next_round_teams = []
-with open('bracket2024.csv', mode='r') as file:
+with open(r'/Users/muneer78/Documents/Projects/fantasy-sports/bracket2025.csv', mode='r') as file:
     csv_file = csv.reader(file)
     for line in csv_file:
         next_round_teams.append(line)
@@ -32,7 +32,7 @@ with open('bracket2024.csv', mode='r') as file:
 round_winners = {round_num: [] for round_num in range(1, 7)}
 
 # Run simulations
-for simulation in range(100):
+for simulation in range(50):
     teams = next_round_teams[:]
     for round_num in range(1, 7):
         if len(teams) == 1:
@@ -52,3 +52,5 @@ with open("final_results.txt", "w") as f:
         for i, (winner, count) in enumerate(winners):
             print(f"Game {i+1}: {winner} ({count} times)", file=f)
         print("\n", file=f)
+
+print("Simulation complete. Results written to final_results.txt")
