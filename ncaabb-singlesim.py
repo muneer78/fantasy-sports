@@ -2,15 +2,17 @@ import csv
 import random
 import math
 
+year = '2025'
+
 # write round of 64 bracket to list
 next_round_teams = []
-with open(r'/Users/muneer78/Documents/Projects/fantasy-sports/bracket2025.csv', mode ='r')as file:
+with open(fr'/Users/muneer78/Documents/Projects/fantasy-sports/bracket{year}.csv', mode ='r')as file:
     csv_file = csv.reader(file)
     for line in csv_file:
         next_round_teams.append(line)
     
 # write everything to results text file
-with open("results.txt", "w") as f:
+with open(fr"/Users/muneer78/Downloads/{year}_single_sim_results.txt", "w") as f:
     while 1:
         
         # define list of teams for this round and clean list for next round
@@ -37,9 +39,9 @@ with open("results.txt", "w") as f:
             # compute a random number between 0 and 100
             r1 = random.randint(0, 100)
 
-            # print out the seed weight and random number
-            print(f'seed weight: {correction:.4f}', file=f)
-            print(f'random integer (0-100): {r1}', file=f)
+            # # print out the seed weight and random number
+            # print(f'seed weight: {correction:.4f}', file=f)
+            # print(f'random integer (0-100): {r1}', file=f)
 
             # pick winner based on random number and 'correction' factor 
             if r1 < (50 + correction):
@@ -47,9 +49,12 @@ with open("results.txt", "w") as f:
             else:
                 next_round_teams.append(teams[i])
             
-            # print results
-            print(f'since {r1} '>' if r1 > 50+{correction} else '<' 50+{correction}:.4f}'+
-                  f' #{next_round_teams[-1][1]} {next_round_teams[-1][0]} wins\n', file=f)
+            # # print results
+            # print(f'since {r1} '>' if r1 > 50+{correction} else '<' 50+{correction}:.4f}'+
+            #       f' #{next_round_teams[-1][1]} {next_round_teams[-1][0]} wins\n', file=f)
+            
+            # print winner of each game
+            print(f'Winner: #{next_round_teams[-1][1]} {next_round_teams[-1][0]}', file=f)
         
         # add a few line break between rounds
         print('\n\n', file=f)
@@ -57,3 +62,5 @@ with open("results.txt", "w") as f:
         # if the number of next round teams is 1, we know we just finished the last round
         if len(next_round_teams) == 1:
             break
+
+print('Done')
