@@ -7,18 +7,18 @@ url = "https://www.cbssports.com/nfl/news/2023-nfl-strength-of-schedule-for-ever
 response = requests.get(url)
 
 # Create a BeautifulSoup object to parse the HTML content
-soup = BeautifulSoup(response.content, 'html.parser')
+soup = BeautifulSoup(response.content, "html.parser")
 
 # Find the table element on the webpage (you may need to inspect the webpage source to identify the specific table)
-table = soup.find('table')
+table = soup.find("table")
 
 # Extract the table headers
-headers = [th.text.strip() for th in table.find_all('th')]
+headers = [th.text.strip() for th in table.find_all("th")]
 
 # Extract the table rows
 data = []
-for row in table.find_all('tr'):
-    row_data = [td.text.strip() for td in row.find_all('td')]
+for row in table.find_all("tr"):
+    row_data = [td.text.strip() for td in row.find_all("td")]
     if row_data:
         data.append(row_data)
 
@@ -26,4 +26,4 @@ for row in table.find_all('tr'):
 df = pd.DataFrame(data, columns=headers)
 
 # Print the DataFrame
-df.to_csv('CBSSportsSOS.csv', index=False)
+df.to_csv("CBSSportsSOS.csv", index=False)

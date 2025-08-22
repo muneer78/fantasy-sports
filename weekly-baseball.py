@@ -1,18 +1,18 @@
-'''
+"""
 1. Make sure excluded.csv is in same folder as script
-	- Need to update this file at the beginning of each season
+        - Need to update this file at the beginning of each season
 2. Download the following reports from Fangraphs
-	- 10 IP Pitchers
-	- 30 IP Pitchers
-	- 40 PA Hitters
-	- Hitters Last 14 Days
-	- Hitters Last 7 Days
-	- Pitchers Last 14 Days
-	- Pitchers Last 30 Days
-	- ZScoreHitter
-	- ZScorePitcher
+        - 10 IP Pitchers
+        - 30 IP Pitchers
+        - 40 PA Hitters
+        - Hitters Last 14 Days
+        - Hitters Last 7 Days
+        - Pitchers Last 14 Days
+        - Pitchers Last 30 Days
+        - ZScoreHitter
+        - ZScorePitcher
 3. Download chart for average game score: https://www.baseball-reference.com/leagues/majors/2023-starter-pitching.shtml
-'''
+"""
 
 import pandas as pd
 from datetime import date, datetime
@@ -37,53 +37,76 @@ for newname, oldname in comp_dict.items():
 
 excluded = pd.read_csv("excluded.csv")
 
-def process_and_merge_data(data_df, temp_data, id_columns, numeric_columns, zscore_columns):
+
+def process_and_merge_data(
+    data_df, temp_data, id_columns, numeric_columns, zscore_columns
+):
     df = data_df.copy()
-    temp_df = temp_data[['Name', 'PlayerId']]
+    temp_df = temp_data[["Name", "PlayerId"]]
 
     df = df.drop(columns=id_columns)
     df = df.fillna(0)
 
-    df[numeric_columns] = df[numeric_columns].astype('float')
+    df[numeric_columns] = df[numeric_columns].astype("float")
 
-    numbers = df.select_dtypes(include='number').columns
+    numbers = df.select_dtypes(include="number").columns
     df[numbers] = df[numbers].apply(stats.zscore)
 
-    df['Total Z-Score'] = df[numbers].sum(axis=1).round(2)
+    df["Total Z-Score"] = df[numbers].sum(axis=1).round(2)
 
-    df = df.merge(temp_df[['Name', 'PlayerId']], on=["Name"], how="left")
+    df = df.merge(temp_df[["Name", "PlayerId"]], on=["Name"], how="left")
 
     return df
 
 
 # Load the data
-dfhitter = pd.read_csv('hitter.csv')
-dfpitcher = pd.read_csv('pitcher.csv')
+dfhitter = pd.read_csv("hitter.csv")
+dfpitcher = pd.read_csv("pitcher.csv")
 
 # Define columns for processing hitters and pitchers
-hitter_id_columns = ['PlayerId', 'MLBAMID']
-hitter_numeric_columns = ["PA", "HR", "SB", 'BABIP+', 'K%+', 'BB%+', 'ISO+', 'wRC+', 'Barrels', "Barrel%"]
-hitter_zscore_columns = hitter_numeric_columns + ['Total Z-Score']
+hitter_id_columns = ["PlayerId", "MLBAMID"]
+hitter_numeric_columns = [
+    "PA",
+    "HR",
+    "SB",
+    "BABIP+",
+    "K%+",
+    "BB%+",
+    "ISO+",
+    "wRC+",
+    "Barrels",
+    "Barrel%",
+]
+hitter_zscore_columns = hitter_numeric_columns + ["Total Z-Score"]
 
-pitcher_id_columns = ['PlayerId', 'MLBAMID']
-pitcher_numeric_columns = ['Stuff+', 'Location+', 'Pitching+', 'Starting', 'Relieving']
-pitcher_zscore_columns = pitcher_numeric_columns + ['Total Z-Score']
+pitcher_id_columns = ["PlayerId", "MLBAMID"]
+pitcher_numeric_columns = ["Stuff+", "Location+", "Pitching+", "Starting", "Relieving"]
+pitcher_zscore_columns = pitcher_numeric_columns + ["Total Z-Score"]
 
 # Process hitter and pitcher data
-dfhitter_processed = process_and_merge_data(dfhitter, dfhitter, hitter_id_columns, hitter_numeric_columns, hitter_zscore_columns)
-dfpitcher_processed = process_and_merge_data(dfpitcher, dfpitcher, pitcher_id_columns, pitcher_numeric_columns, pitcher_zscore_columns)
+dfhitter_processed = process_and_merge_data(
+    dfhitter, dfhitter, hitter_id_columns, hitter_numeric_columns, hitter_zscore_columns
+)
+dfpitcher_processed = process_and_merge_data(
+    dfpitcher,
+    dfpitcher,
+    pitcher_id_columns,
+    pitcher_numeric_columns,
+    pitcher_zscore_columns,
+)
 
 # Add Total Z-Score column to the original DataFrames
-dfhitter['Total Z-Score'] = dfhitter_processed['Total Z-Score']
-dfpitcher['Total Z-Score'] = dfpitcher_processed['Total Z-Score']
+dfhitter["Total Z-Score"] = dfhitter_processed["Total Z-Score"]
+dfpitcher["Total Z-Score"] = dfpitcher_processed["Total Z-Score"]
 
 today = date.today()
 today = datetime.strptime(
     "2024-10-31", "%Y-%m-%d"
 ).date()  # pinning to last day of baseball season
 
+
 def hitters_wk_preprocessing(filepath):
-    '''Creates weekly hitter calcs'''
+    """Creates weekly hitter calcs"""
     df = pd.read_csv(filepath, index_col=["PlayerId"])
 
     filter = df[(df["PA"] > 10)]
@@ -248,4 +271,4 @@ with open("weeklyadds.csv", "w+") as f:
             df.round(2).to_csv(f, index=False)
             f.write("\n")
             printed_titles.append(title)
-print('All done')
+print("All done")

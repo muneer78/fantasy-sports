@@ -3,6 +3,7 @@ Pandas creates and works with the dataframes
 scipy does the z-score calcs
 numpy does some additional stats processing pandas can't do
 """
+
 import pandas as pd
 from scipy import stats
 import numpy as np
@@ -83,6 +84,7 @@ def func(player_name):
     Fix player names in all dataframes
     """
     return "".join([i[:3] for i in player_name.strip().split(" ")])
+
 
 dffgpit["Key"] = dffgpit.Name.apply(func)
 dfstuff["Key"] = dfstuff.player_name.apply(func)

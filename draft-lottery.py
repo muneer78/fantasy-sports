@@ -11,7 +11,7 @@ team_assignments = {
     "Tony": list(range(20, 40)),
     "Steve": list(range(10, 20)),
     "Scott": list(range(5, 10)),
-    "Brian": list(range(1, 5))
+    "Brian": list(range(1, 5)),
 }
 
 # Initialize an empty list to store the draft order
@@ -21,16 +21,16 @@ draft_order = []
 while team_assignments:
     # Pick a random number from 1 to 100
     random_number = random.randint(1, 250)
-    
+
     # Find the team associated with the random number
     for team, numbers in team_assignments.items():
         if random_number in numbers:
             # Add the winning team to the draft order
             draft_order.append(team)
-            
+
             # Remove the winning team's range from the list of teams
             del team_assignments[team]
-            
+
             break
 
 # Print the final draft order

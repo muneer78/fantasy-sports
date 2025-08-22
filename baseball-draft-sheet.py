@@ -1,4 +1,4 @@
-'''
+"""
 Steps to get create the CSVs
 1. Update Preseason Hitter Report on Fangraphs
 2. Download as hitter.csv
@@ -6,16 +6,18 @@ Steps to get create the CSVs
 4. Downlaod as hitter.csv
 5. Go to Draft Rankings on Fantasy Pros. Download rankings file as csv. Update name of reference in script.
 6. Request csv file from John Laghezza
-'''
+"""
 
 import pandas as pd
 from scipy import stats
 import numpy as np
 from unidecode import unidecode
 
+
 # Function to create keys from player names
 def create_key(player_name):
     return "".join([i[:3] for i in player_name.strip().split(" ")])
+
 
 # Function to remove accents
 def remove_accents(text):
@@ -24,13 +26,20 @@ def remove_accents(text):
     else:
         return text  # Retu
 
+
 # Read the preseason pitchers data
 df_pitchers = pd.read_csv("pitcher.csv", index_col=["PlayerId"])
 
 # Calculate EstimatedQS
-expr1 = (df_pitchers["GS"] / (df_pitchers["ER"] * (df_pitchers["GS"] / df_pitchers["G"]))).fillna(0).replace([np.inf, -np.inf], 0)
+expr1 = (
+    (df_pitchers["GS"] / (df_pitchers["ER"] * (df_pitchers["GS"] / df_pitchers["G"])))
+    .fillna(0)
+    .replace([np.inf, -np.inf], 0)
+)
 expr2 = (df_pitchers["IP"] * (df_pitchers["GS"] / df_pitchers["G"])).fillna(0)
-expr3 = (((df_pitchers["GS"] + df_pitchers["G"]) / (2 * df_pitchers["G"])) ** 2).fillna(0)
+expr3 = (((df_pitchers["GS"] + df_pitchers["G"]) / (2 * df_pitchers["G"])) ** 2).fillna(
+    0
+)
 df_pitchers["EstimatedQS"] = expr1 * expr2 * expr3
 
 # Drop unnecessary columns
@@ -61,7 +70,9 @@ df_pitchers["Total Z-Score_Pitcher"] = df_pitchers[numerical_columns].sum(axis=1
 df_pitchers.drop("Total Numerical Sum", axis=1, inplace=True)
 
 # Round the dataframe and save to CSV
-rounded_df_pitchers = df_pitchers.round(decimals=2).sort_values(by="Total Z-Score_Pitcher", ascending=False)
+rounded_df_pitchers = df_pitchers.round(decimals=2).sort_values(
+    by="Total Z-Score_Pitcher", ascending=False
+)
 rounded_df_pitchers.to_csv("ZPitchers.csv")
 
 # Read the preseason hitters data
@@ -85,7 +96,9 @@ df_hitters["Total Z-Score_Hitter"] = df_hitters[numerical_columns1].sum(axis=1)
 df_hitters.drop("Total Numerical Sum", axis=1, inplace=True)
 
 # Round the dataframe and save to CSV
-rounded_df_hitters = df_hitters.round(decimals=2).sort_values(by="Total Z-Score_Hitter", ascending=False)
+rounded_df_hitters = df_hitters.round(decimals=2).sort_values(
+    by="Total Z-Score_Hitter", ascending=False
+)
 rounded_df_hitters.to_csv("ZHitters.csv")
 
 # Read the additional dataframes
@@ -96,12 +109,19 @@ df_laghezza = pd.read_csv("laghezza.csv")
 
 df_adp = df_adp.rename(columns={"Player": "Name"})
 
-dataframes_to_clean = [df_adp, df_zpit, df_zhit, df_laghezza]  # List of DataFrames to clean
+dataframes_to_clean = [
+    df_adp,
+    df_zpit,
+    df_zhit,
+    df_laghezza,
+]  # List of DataFrames to clean
 for df in dataframes_to_clean:
-    df['Name'] = df['Name'].apply(remove_accents)  # Remove accents
-    df['Name'] = df['Name'].str.replace(r"[^\w\s]|_\*|\.|,", "")  # Remove special characters, '.', and ','
-    df['Name'] = df['Name'].str.replace(" Jr.", "")  # Remove "Jr"
-    df['Name'] = df['Name'].str.replace(" II", "")  # Remove "II"
+    df["Name"] = df["Name"].apply(remove_accents)  # Remove accents
+    df["Name"] = df["Name"].str.replace(
+        r"[^\w\s]|_\*|\.|,", ""
+    )  # Remove special characters, '.', and ','
+    df["Name"] = df["Name"].str.replace(" Jr.", "")  # Remove "Jr"
+    df["Name"] = df["Name"].str.replace(" II", "")  # Remove "II"
 
 # Convert df_adp to string
 df_adp = df_adp.astype(str)
@@ -119,9 +139,11 @@ df_laghezza["Key"] = df_laghezza["Name"].apply(create_key)
 dflist = [df_zpit, df_zhit, df_adp, df_laghezza]
 
 # Merge the dataframes with suffixes to handle duplicate columns
-df1 = df_adp.merge(df_zpit[["Key", "Total Z-Score_Pitcher"]], on=["Key"], how="left")\
-    .merge(df_zhit[["Key", "Total Z-Score_Hitter"]], on=["Key"], how="left")\
+df1 = (
+    df_adp.merge(df_zpit[["Key", "Total Z-Score_Pitcher"]], on=["Key"], how="left")
+    .merge(df_zhit[["Key", "Total Z-Score_Hitter"]], on=["Key"], how="left")
     .merge(df_laghezza[["Key", "LRank"]], on=["Key"], how="left")
+)
 
 # Fill NaN values with zeros
 df1 = df1.fillna(0)
@@ -134,7 +156,9 @@ df1[cols] = df1[cols].apply(pd.to_numeric, errors="coerce", axis=1)
 df1 = df1.drop_duplicates(subset=["Name", "Rank"], keep="last")
 
 # Calculate the "Total Z-Score" column
-df1["Total Z-Score"] = df1["Total Z-Score_Pitcher"].mask(df1["Total Z-Score_Pitcher"].eq(0), df1["Total Z-Score_Hitter"])
+df1["Total Z-Score"] = df1["Total Z-Score_Pitcher"].mask(
+    df1["Total Z-Score_Pitcher"].eq(0), df1["Total Z-Score_Hitter"]
+)
 
 # Create the "CombinedRank" column
 df1["CombinedRank"] = df1["LRank"].mask(df1["LRank"].eq(0), df1["Rank"])
