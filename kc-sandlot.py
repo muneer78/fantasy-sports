@@ -10,7 +10,7 @@ def create_key(player_name):
 
 
 # Read dataframes
-df_kcsandlotkeepers = pd.read_csv("KC Sandlot Keepers.csv")
+df_kcsandlotkeepers = pd.read_csv("sandlot-keepers.csv")
 df_draftsheet = pd.read_csv("draftsheet.csv")
 
 # Filter out rows with empty or NaN values in the "Name" column
