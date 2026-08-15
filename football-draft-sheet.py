@@ -457,30 +457,35 @@ def normalize_player_data(conn, players_table: str, oline_table: str = None, sos
     result = conn.execute(f"PRAGMA table_info({players_table})").fetchall()
     actual_columns = {row[1].lower(): row[1] for row in result}
     
+    print(f"  Raw columns from CSV: {list(actual_columns.values())}")
+    
     # Find the correct column names (case-insensitive matching)
     name_col = None
     rank_col = None
     team_col = None
     pos_col = None
     
+    # Try multiple variations for each column type
     for col_lower, col_actual in actual_columns.items():
-        if col_lower in ["player name", "name", "player"]:
+        if not name_col and col_lower in ["player name", "name", "player", "playername"]:
             name_col = col_actual
-        elif col_lower in ["rk", "rank", "adp"]:
+        elif not rank_col and col_lower in ["rk", "rank", "adp", "ranking"]:
             rank_col = col_actual
-        elif col_lower in ["team"]:
+        elif not team_col and col_lower in ["team", "tm"]:
             team_col = col_actual
-        elif col_lower in ["pos", "position"]:
+        elif not pos_col and col_lower in ["pos", "position", "posit"]:
             pos_col = col_actual
     
     if not all([name_col, rank_col, team_col, pos_col]):
         print(f"Error: Missing required columns")
-        print(f"  name_col: {name_col}")
-        print(f"  rank_col: {rank_col}")
-        print(f"  team_col: {team_col}")
-        print(f"  pos_col: {pos_col}")
+        print(f"  name_col: {name_col} (looked for: player name, name, player)")
+        print(f"  rank_col: {rank_col} (looked for: rk, rank, adp, ranking)")
+        print(f"  team_col: {team_col} (looked for: team, tm)")
+        print(f"  pos_col: {pos_col} (looked for: pos, position)")
         print(f"  Available columns: {list(actual_columns.values())}")
         return None
+    
+    print(f"  ✓ Mapped columns: name='{name_col}', team='{team_col}', position='{pos_col}', adp='{rank_col}'")
     
     # Clean and standardize player data
     working_table = "players_cleaned"
@@ -496,7 +501,6 @@ def normalize_player_data(conn, players_table: str, oline_table: str = None, sos
     """)
     
     print(f"✓ Cleaned player names, teams, and positions")
-    print(f"  Mapped columns: name='{name_col}', team='{team_col}', position='{pos_col}', adp='{rank_col}'")
     
     # Merge offensive line data if available
     if oline_table:
