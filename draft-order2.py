@@ -8,14 +8,16 @@ import pandas as pd
 places = [
     "Britt",
     "Muneer",
-    "Steven",
-    "Scott",
+    "Himes",
+    "Mike",
     "Jason",
     "Lisa",
     "Carl",
     "Brian",
     "Nick",
     "Tony",
+    "Stephen",
+    "Scott"
 ]
 
 # Initialize a dictionary to store the counts
