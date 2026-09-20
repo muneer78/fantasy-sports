@@ -10,5 +10,13 @@ dependencies = [
     "numpy",
     "pymlb-statsapi>=1.4.3",
     "duckdb>=1.5.5",
+    "pybaseball>=2.2.7",
+    "textual>=8.2.8",
+    "polars-baseball",
+    "trafilatura>=2.2.0",
+    "ebooklib>=0.20",
 ]
+
+[tool.uv.sources]
+polars-baseball = { git = "https://github.com/nicko4o/polars-baseball.git" }
 
